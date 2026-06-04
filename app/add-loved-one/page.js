@@ -199,19 +199,31 @@ export default function AddLovedOnePage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-              <input
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-sm outline-none"
-              />
+              <div>
+                <label className="mb-3 block text-xs uppercase tracking-[0.15em] text-stone-400">
+                  Birth Date
+                </label>
 
-              <input
-                type="date"
-                value={deathDate}
-                onChange={(e) => setDeathDate(e.target.value)}
-                className="w-full rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-sm outline-none"
-              />
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  className="w-full rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-sm outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-3 block text-xs uppercase tracking-[0.15em] text-stone-400">
+                  Date of Passing
+                </label>
+
+                <input
+                  type="date"
+                  value={deathDate}
+                  onChange={(e) => setDeathDate(e.target.value)}
+                  className="w-full rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-sm outline-none"
+                />
+              </div>
             </div>
 
             <select
