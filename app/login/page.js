@@ -1,36 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import {
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { supabase } from "@/lib/supabase";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-
   const searchParams = useSearchParams();
 
-  const redirectTo =
-    searchParams.get("redirect") || "/add-loved-one";
+  const redirectTo = searchParams.get("redirect") || "/add-loved-one";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function loginUser() {
+  async function loginUser(e) {
+    e.preventDefault();
+
     setLoading(true);
     setMessage("");
 
-    const { error } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
       setMessage(error.message);
@@ -63,7 +59,7 @@ export default function LoginPage() {
             spaces.
           </p>
 
-          <div className="space-y-5">
+          <form onSubmit={loginUser} className="space-y-5">
             <div>
               <label className="mb-2 block text-sm text-stone-500">
                 Email
@@ -72,10 +68,9 @@ export default function LoginPage() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
+                required
               />
             </div>
 
@@ -87,10 +82,9 @@ export default function LoginPage() {
               <input
                 type="password"
                 value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
+                required
               />
             </div>
 
@@ -101,34 +95,40 @@ export default function LoginPage() {
             )}
 
             <button
-              onClick={loginUser}
+              type="submit"
               disabled={loading}
               className="w-full rounded-full bg-stone-900 px-7 py-3.5 text-sm font-medium text-white disabled:opacity-60"
             >
-              {loading
-                ? "Logging in..."
-                : "Login"}
+              {loading ? "Logging in..." : "Login"}
             </button>
 
             <p className="text-center text-sm text-stone-500">
               No account yet?{" "}
-              <Link
-                href="/signup"
-                className="underline underline-offset-4"
-              >
+              <Link href="/signup" className="underline underline-offset-4">
                 Create one
               </Link>
             </p>
 
-            <Link
-              href="/"
-              className="block text-center text-sm text-stone-400"
-            >
+            <Link href="/" className="block text-center text-sm text-stone-400">
               Back home
             </Link>
-          </div>
+          </form>
         </div>
       </section>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-stone-50 text-stone-500">
+          Loading login...
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }
