@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 const TRAGEDIES = {
   "garissa-university-attack": {
@@ -110,6 +111,12 @@ export default async function TragedyDetailPage({ params }) {
   const slug = resolvedParams?.slug;
   const tragedy = TRAGEDIES[slug];
 
+  const { data: connectedMemorials } = await supabase
+    .from("memorials")
+    .select("id, name, birth_date, death_date, category, tribute, image_url")
+    .eq("tragedy_slug", slug)
+    .order("created_at", { ascending: false });
+
   if (!tragedy) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-stone-50 px-6 text-center">
@@ -190,6 +197,84 @@ export default async function TragedyDetailPage({ params }) {
                   </div>
                 ))}
               </div>
+            </div>
+
+            <div className="rounded-2xl border border-stone-100 bg-white p-8">
+              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-stone-400">
+                    Connected Memorials
+                  </p>
+
+                  <h2 className="font-serif text-2xl text-stone-800">
+                    Lives remembered here
+                  </h2>
+                </div>
+
+                <p className="text-sm font-light text-stone-400">
+                  {connectedMemorials?.length || 0} memorial
+                  {(connectedMemorials?.length || 0) === 1 ? "" : "s"}
+                </p>
+              </div>
+
+              {!connectedMemorials || connectedMemorials.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-6 text-center">
+                  <p className="mb-4 text-sm font-light leading-relaxed text-stone-500">
+                    No loved ones have been connected to this tragedy yet.
+                  </p>
+
+                  <Link
+                    href={`/add-loved-one?tragedy=${slug}`}
+                    className="inline-block rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white"
+                  >
+                    Add Loved One to This Tragedy
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid gap-5 sm:grid-cols-2">
+                  {connectedMemorials.map((person) => (
+                    <Link
+                      key={person.id}
+                      href={`/memorials/${person.id}`}
+                      className="overflow-hidden rounded-2xl border border-stone-100 bg-stone-50 transition hover:-translate-y-1 hover:shadow-sm"
+                    >
+                      <div className="h-44 overflow-hidden bg-stone-200">
+                        {person.image_url ? (
+                          <img
+                            src={person.image_url}
+                            alt={person.name}
+                            className="h-full w-full object-cover object-top"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-4xl text-stone-400">
+                            ♡
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-5">
+                        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-stone-400">
+                          {person.category || "Memorial"}
+                        </p>
+
+                        <h3 className="mb-2 font-serif text-xl text-stone-800">
+                          {person.name}
+                        </h3>
+
+                        <p className="mb-4 text-xs text-stone-400">
+                          {person.birth_date || "Birth"} —{" "}
+                          {person.death_date || "Remembrance"}
+                        </p>
+
+                        <p className="line-clamp-3 text-sm font-light leading-relaxed text-stone-500">
+                          {person.tribute ||
+                            "A life remembered with dignity and love."}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
 
