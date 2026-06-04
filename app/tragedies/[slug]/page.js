@@ -238,6 +238,24 @@ export default async function TragedyDetailPage({ params }) {
               </p>
             </div>
 
+            <div className="rounded-2xl border border-stone-100 bg-white p-6">
+              <h3 className="mb-3 font-serif text-lg text-stone-800">
+                Add a Loved One
+              </h3>
+
+              <p className="mb-5 text-sm font-light leading-relaxed text-stone-500">
+                If someone you remember is connected to this tragedy, you may
+                create a memorial page and preserve their story with dignity.
+              </p>
+
+              <Link
+                href={`/add-loved-one?tragedy=${slug}`}
+                className="block rounded-full bg-stone-900 px-5 py-3 text-center text-sm font-medium text-white"
+              >
+                Add Loved One to This Tragedy
+              </Link>
+            </div>
+
             <Link
               href="/tragedies"
               className="block rounded-2xl border border-stone-100 bg-white p-6 text-sm font-medium text-stone-700 transition hover:border-stone-200 hover:shadow-sm"
