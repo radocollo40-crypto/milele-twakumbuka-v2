@@ -1,12 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function AddLovedOnePage() {
+const tragedyNames = {
+  "garissa-university-attack": "Garissa University Attack",
+  "westgate-attack": "Westgate Attack",
+  "molo-tanker-tragedy": "Molo Tanker Tragedy",
+  "solai-dam-tragedy": "Solai Dam Tragedy",
+  "likoni-ferry-tragedy": "Likoni Ferry Tragedy",
+  "river-road-fire-tragedies": "River Road Fire Tragedies",
+};
+
+function AddLovedOneContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const tragedySlug = searchParams.get("tragedy") || "";
+  const tragedyName = tragedyNames[tragedySlug] || "";
 
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -99,6 +112,7 @@ export default function AddLovedOnePage() {
             story,
             image_url: imageUrl,
             user_id: user.id,
+            tragedy_slug: tragedySlug || null,
           },
         ])
         .select()
@@ -147,7 +161,9 @@ export default function AddLovedOnePage() {
 
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Link
-                href="/login"
+                href={`/login?redirect=/add-loved-one${
+                  tragedySlug ? `?tragedy=${tragedySlug}` : ""
+                }`}
                 className="rounded-full bg-stone-900 px-7 py-3 text-sm font-medium text-white"
               >
                 Login
@@ -181,6 +197,22 @@ export default function AddLovedOnePage() {
           Create a dignified remembrance page with memory, story, family, and
           legacy preserved with care.
         </p>
+
+        {tragedyName && (
+          <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-stone-100 bg-stone-50 p-5 text-center">
+            <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
+              Connected Tragedy
+            </p>
+
+            <p className="font-serif text-xl text-stone-800">
+              {tragedyName}
+            </p>
+
+            <p className="mt-2 text-sm font-light leading-relaxed text-stone-500">
+              This memorial will be linked to this tragedy remembrance space.
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="px-5 py-12 sm:px-6 sm:py-16">
@@ -303,5 +335,19 @@ export default function AddLovedOnePage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function AddLovedOnePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-stone-50">
+          <p className="text-stone-500">Loading...</p>
+        </main>
+      }
+    >
+      <AddLovedOneContent />
+    </Suspense>
   );
 }
