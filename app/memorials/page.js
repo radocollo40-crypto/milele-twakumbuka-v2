@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
@@ -16,7 +16,7 @@ const categories = [
   "Artists & Cultural Figures",
 ];
 
-export default function MemorialsPage() {
+function MemorialsContent() {
   const searchParams = useSearchParams();
   const categoryFromUrl = searchParams.get("category") || "All";
 
@@ -187,5 +187,19 @@ export default function MemorialsPage() {
         </p>
       </footer>
     </main>
+  );
+}
+
+export default function MemorialsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-[#fbfaf8] text-stone-500">
+          Loading memorials...
+        </main>
+      }
+    >
+      <MemorialsContent />
+    </Suspense>
   );
 }
