@@ -19,10 +19,9 @@ export default function FamilyWallPage() {
   const [message, setMessage] = useState("");
   const [posting, setPosting] = useState(false);
 
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviting, setInviting] = useState(false);
-  const [inviteMessage, setInviteMessage] = useState("");
-  const [members, setMembers] = useState([]);
+  const [conversationMessages, setConversationMessages] = useState([]);
+  const [conversationText, setConversationText] = useState("");
+  const [sendingConversation, setSendingConversation] = useState(false);
 
   const [inviteLink, setInviteLink] = useState("");
   const [generatingLink, setGeneratingLink] = useState(false);
@@ -98,13 +97,13 @@ export default function FamilyWallPage() {
 
         if (mounted) setPosts(wallPosts || []);
 
-        const { data: wallMembers } = await supabase
-          .from("family_wall_members")
+        const { data: wallMessages } = await supabase
+          .from("family_wall_messages")
           .select("*")
           .eq("wall_id", existingWall.id)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: true });
 
-        if (mounted) setMembers(wallMembers || []);
+        if (mounted) setConversationMessages(wallMessages || []);
       } catch (error) {
         console.log(error.message);
         if (mounted) setUser(null);
@@ -145,35 +144,29 @@ export default function FamilyWallPage() {
     setPosting(false);
   }
 
-  async function inviteFamilyMember() {
-    if (!inviteEmail.trim() || !wall) return;
+  async function sendConversationMessage() {
+    if (!conversationText.trim() || !wall || !user) return;
 
-    setInviting(true);
-    setInviteMessage("");
+    setSendingConversation(true);
 
     const { data, error } = await supabase
-      .from("family_wall_members")
+      .from("family_wall_messages")
       .insert([
         {
           wall_id: wall.id,
-          invited_email: inviteEmail,
-          status: "pending",
-          role: "member",
+          user_id: user.id,
+          message: conversationText,
         },
       ])
       .select()
       .single();
 
-    if (error) {
-      setInviteMessage(error.message || "Unable to send invitation.");
-      setInviting(false);
-      return;
+    if (!error && data) {
+      setConversationMessages((prev) => [...prev, data]);
+      setConversationText("");
     }
 
-    setMembers((prev) => [data, ...prev]);
-    setInviteEmail("");
-    setInviteMessage("Family invitation added.");
-    setInviting(false);
+    setSendingConversation(false);
   }
 
   async function generateInviteLink() {
@@ -198,7 +191,6 @@ export default function FamilyWallPage() {
     ]);
 
     if (error) {
-      console.log("Invite link error:", error);
       setCopyMessage(error.message || "Unable to generate invite link.");
       setGeneratingLink(false);
       return;
@@ -238,7 +230,7 @@ export default function FamilyWallPage() {
 
           <p className="mb-7 text-sm leading-relaxed text-stone-500">
             This family wall is private. Please login to access family
-            reflections, memories, and future private uploads.
+            reflections, conversations, voice remembrance, and family photos.
           </p>
 
           <div className="flex flex-col gap-3">
@@ -277,86 +269,167 @@ export default function FamilyWallPage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-stone-100 bg-white p-7 shadow-sm">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h2 className="font-serif text-2xl text-stone-800">
-                Family Reflections
-              </h2>
+        <div className="space-y-10 rounded-3xl border border-stone-100 bg-white p-7 shadow-sm">
+          <section>
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h2 className="font-serif text-2xl text-stone-800">
+                  Family Reflections
+                </h2>
 
-              <p className="mt-2 text-sm text-stone-500">
-                Private messages shared among family members.
-              </p>
+                <p className="mt-2 text-sm text-stone-500">
+                  Share lasting memories, stories, and heartfelt reflections.
+                </p>
+              </div>
+
+              <div className="rounded-full bg-stone-100 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
+                Memory
+              </div>
             </div>
 
-            <div className="rounded-full bg-stone-100 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
-              Private
+            <div className="mb-8 rounded-3xl border border-stone-100 bg-stone-50 p-5">
+              <textarea
+                rows="5"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Write a private family reflection..."
+                className="mb-4 w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none"
+              />
+
+              <button
+                onClick={createPost}
+                disabled={posting}
+                className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {posting ? "Posting..." : "Create Reflection"}
+              </button>
             </div>
-          </div>
 
-          <div className="mb-8 rounded-3xl border border-stone-100 bg-stone-50 p-5">
-            <textarea
-              rows="5"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Write a private family reflection..."
-              className="mb-4 w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none"
-            />
+            {posts.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-stone-200 p-10 text-center">
+                <p className="mb-3 text-4xl">♡</p>
 
-            <button
-              onClick={createPost}
-              disabled={posting}
-              className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
-            >
-              {posting ? "Posting..." : "Create Reflection"}
-            </button>
-          </div>
+                <h3 className="mb-3 font-serif text-2xl text-stone-800">
+                  No family reflections yet
+                </h3>
 
-          {posts.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-stone-200 p-10 text-center">
-              <p className="mb-3 text-4xl">♡</p>
+                <p className="mx-auto max-w-xl text-sm leading-relaxed text-stone-500">
+                  Family members can use this space for private memories,
+                  reflections, and remembrance.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {posts.map((post) => (
+                  <div
+                    key={post.id}
+                    className="rounded-2xl border border-stone-100 bg-stone-50 p-5"
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-4">
+                      <p className="text-sm font-medium text-stone-800">
+                        Family Member
+                      </p>
 
-              <h3 className="mb-3 font-serif text-2xl text-stone-800">
-                No family reflections yet
-              </h3>
+                      <p className="text-xs text-stone-400">
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
 
-              <p className="mx-auto max-w-xl text-sm leading-relaxed text-stone-500">
-                Family members can use this space for private memories,
-                reflections, and future voice remembrance.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              {posts.map((post) => (
-                <div
-                  key={post.id}
-                  className="rounded-2xl border border-stone-100 bg-stone-50 p-5"
-                >
-                  <div className="mb-3 flex items-center justify-between gap-4">
-                    <p className="text-sm font-medium text-stone-800">
-                      Family Member
-                    </p>
-
-                    <p className="text-xs text-stone-400">
-                      {new Date(post.created_at).toLocaleDateString()}
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-stone-600">
+                      {post.message}
                     </p>
                   </div>
+                ))}
+              </div>
+            )}
+          </section>
 
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-stone-600">
-                    {post.message}
+          <section className="rounded-3xl border border-stone-100 bg-stone-50 p-5">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="font-serif text-2xl text-stone-800">
+                  Family Conversation
+                </h2>
+
+                <p className="mt-2 text-sm text-stone-500">
+                  A private space for family coordination, support, and quiet
+                  conversation.
+                </p>
+              </div>
+
+              <div className="rounded-full bg-white px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
+                Private
+              </div>
+            </div>
+
+            <div className="mb-5 max-h-[420px] space-y-4 overflow-y-auto rounded-3xl border border-stone-100 bg-white p-5">
+              {conversationMessages.length === 0 ? (
+                <div className="py-10 text-center">
+                  <p className="mb-3 text-3xl">💬</p>
+
+                  <h3 className="mb-2 font-serif text-xl text-stone-800">
+                    No conversation yet
+                  </h3>
+
+                  <p className="mx-auto max-w-md text-sm leading-relaxed text-stone-500">
+                    Family members can use this room for updates, support, and
+                    planning.
                   </p>
                 </div>
-              ))}
+              ) : (
+                conversationMessages.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`max-w-[85%] rounded-2xl px-5 py-4 ${
+                      item.user_id === user.id
+                        ? "ml-auto bg-stone-900 text-white"
+                        : "mr-auto bg-stone-100 text-stone-700"
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                      {item.message}
+                    </p>
+
+                    <p
+                      className={`mt-2 text-[10px] uppercase tracking-[0.18em] ${
+                        item.user_id === user.id
+                          ? "text-stone-400"
+                          : "text-stone-400"
+                      }`}
+                    >
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
-          )}
+
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <input
+                value={conversationText}
+                onChange={(e) => setConversationText(e.target.value)}
+                placeholder="Write a family message..."
+                className="flex-1 rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none"
+              />
+
+              <button
+                onClick={sendConversationMessage}
+                disabled={sendingConversation}
+                className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {sendingConversation ? "Sending..." : "Send"}
+              </button>
+            </div>
+          </section>
 
           {wall && <VoiceRemembranceSection wallId={wall.id} />}
+
           {wall && <FamilyPhotoGallerySection wallId={wall.id} />}
 
-          <div className="mt-10 rounded-3xl border border-stone-100 bg-stone-50 p-5">
-            <div className="mb-8 rounded-3xl border border-stone-100 bg-white p-5">
+          <section className="rounded-3xl border border-stone-100 bg-stone-50 p-5">
+            <div className="rounded-3xl border border-stone-100 bg-white p-5">
               <h3 className="mb-4 font-serif text-xl text-stone-800">
-                Family Invite Link
+                Invite Family
               </h3>
 
               <p className="mb-4 text-sm leading-relaxed text-stone-500">
@@ -393,56 +466,7 @@ export default function FamilyWallPage() {
                 <p className="mt-4 text-sm text-stone-500">{copyMessage}</p>
               )}
             </div>
-
-            <h3 className="mb-4 font-serif text-xl text-stone-800">
-              Invite Family by Email
-            </h3>
-
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <input
-                type="email"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                placeholder="Family member email"
-                className="flex-1 rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none"
-              />
-
-              <button
-                onClick={inviteFamilyMember}
-                disabled={inviting}
-                className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
-              >
-                {inviting ? "Inviting..." : "Send Invite"}
-              </button>
-            </div>
-
-            {inviteMessage && (
-              <p className="mt-4 text-sm text-stone-500">{inviteMessage}</p>
-            )}
-
-            {members.length > 0 && (
-              <div className="mt-8 space-y-3">
-                {members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center justify-between rounded-2xl border border-stone-100 bg-white px-5 py-4"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-stone-800">
-                        {member.invited_email}
-                      </p>
-
-                      <p className="text-xs text-stone-400">{member.role}</p>
-                    </div>
-
-                    <div className="rounded-full bg-stone-100 px-3 py-1 text-xs uppercase tracking-[0.2em] text-stone-500">
-                      {member.status}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          </section>
         </div>
 
         <div className="mt-10">
