@@ -20,6 +20,8 @@ export default function FamilyConversationPage() {
   const [editingText, setEditingText] = useState("");
 
   useEffect(() => {
+    let channel;
+
     async function loadConversation() {
       const {
         data: { user },
@@ -49,12 +51,53 @@ export default function FamilyConversationPage() {
           .order("created_at", { ascending: true });
 
         setMessages(data || []);
+
+        channel = supabase
+          .channel(`family-wall-messages-${currentWall.id}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "family_wall_messages",
+              filter: `wall_id=eq.${currentWall.id}`,
+            },
+            (payload) => {
+              if (payload.eventType === "INSERT") {
+                setMessages((prev) => {
+                  const exists = prev.some((item) => item.id === payload.new.id);
+                  return exists ? prev : [...prev, payload.new];
+                });
+              }
+
+              if (payload.eventType === "UPDATE") {
+                setMessages((prev) =>
+                  prev.map((item) =>
+                    item.id === payload.new.id ? payload.new : item
+                  )
+                );
+              }
+
+              if (payload.eventType === "DELETE") {
+                setMessages((prev) =>
+                  prev.filter((item) => item.id !== payload.old.id)
+                );
+              }
+            }
+          )
+          .subscribe();
       }
 
       setLoading(false);
     }
 
     loadConversation();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [slug]);
 
   useEffect(() => {
@@ -66,22 +109,16 @@ export default function FamilyConversationPage() {
 
     setSending(true);
 
-    const { data, error } = await supabase
-      .from("family_wall_messages")
-      .insert([
-        {
-          wall_id: wall.id,
-          user_id: user.id,
-          message: text,
-        },
-      ])
-      .select()
-      .single();
+    const messageToSend = text;
+    setText("");
 
-    if (!error && data) {
-      setMessages((prev) => [...prev, data]);
-      setText("");
-    }
+    await supabase.from("family_wall_messages").insert([
+      {
+        wall_id: wall.id,
+        user_id: user.id,
+        message: messageToSend,
+      },
+    ]);
 
     setSending(false);
   }
@@ -97,39 +134,28 @@ export default function FamilyConversationPage() {
   }
 
   async function saveEdit(id) {
-    if (!editingText.trim()) return;
+    if (!editingText.trim() || !user) return;
 
-    const { data, error } = await supabase
+    await supabase
       .from("family_wall_messages")
       .update({
         message: editingText,
       })
       .eq("id", id)
-      .eq("user_id", user.id)
-      .select()
-      .single();
+      .eq("user_id", user.id);
 
-    if (!error && data) {
-      setMessages((prev) =>
-        prev.map((item) => (item.id === id ? data : item))
-      );
-      cancelEdit();
-    }
+    cancelEdit();
   }
 
   async function deleteMessage(id) {
     const confirmDelete = window.confirm("Delete this message?");
-    if (!confirmDelete) return;
+    if (!confirmDelete || !user) return;
 
-    const { error } = await supabase
+    await supabase
       .from("family_wall_messages")
       .delete()
       .eq("id", id)
       .eq("user_id", user.id);
-
-    if (!error) {
-      setMessages((prev) => prev.filter((item) => item.id !== id));
-    }
   }
 
   if (loading) {
@@ -252,6 +278,7 @@ export default function FamilyConversationPage() {
 
                       <div className="mt-3 flex items-center justify-between gap-3">
                         <p className="text-[10px] uppercase tracking-[0.18em] text-stone-400">
+                          {isOwnMessage ? "You" : "Family Member"} ·{" "}
                           {new Date(item.created_at).toLocaleString()}
                         </p>
 
