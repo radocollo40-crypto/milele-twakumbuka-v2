@@ -151,11 +151,20 @@ export default function FamilyConversationPage() {
     const confirmDelete = window.confirm("Delete this message?");
     if (!confirmDelete || !user) return;
 
-    await supabase
+    const previousMessages = messages;
+
+    setMessages((prev) => prev.filter((item) => item.id !== id));
+
+    const { error } = await supabase
       .from("family_wall_messages")
       .delete()
       .eq("id", id)
       .eq("user_id", user.id);
+
+    if (error) {
+      setMessages(previousMessages);
+      alert(error.message || "Unable to delete message.");
+    }
   }
 
   if (loading) {
