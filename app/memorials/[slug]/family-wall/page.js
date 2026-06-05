@@ -96,9 +96,7 @@ export default function FamilyWallPage() {
           .eq("wall_id", existingWall.id)
           .order("created_at", { ascending: false });
 
-        if (mounted) {
-          setPosts(wallPosts || []);
-        }
+        if (mounted) setPosts(wallPosts || []);
 
         const { data: wallMembers } = await supabase
           .from("family_wall_members")
@@ -106,19 +104,12 @@ export default function FamilyWallPage() {
           .eq("wall_id", existingWall.id)
           .order("created_at", { ascending: false });
 
-        if (mounted) {
-          setMembers(wallMembers || []);
-        }
+        if (mounted) setMembers(wallMembers || []);
       } catch (error) {
         console.log(error.message);
-
-        if (mounted) {
-          setUser(null);
-        }
+        if (mounted) setUser(null);
       } finally {
-        if (mounted) {
-          setCheckingAuth(false);
-        }
+        if (mounted) setCheckingAuth(false);
       }
     }
 
@@ -174,7 +165,7 @@ export default function FamilyWallPage() {
       .single();
 
     if (error) {
-      setInviteMessage("Unable to send invitation.");
+      setInviteMessage(error.message || "Unable to send invitation.");
       setInviting(false);
       return;
     }
@@ -186,7 +177,10 @@ export default function FamilyWallPage() {
   }
 
   async function generateInviteLink() {
-    if (!wall || !user) return;
+    if (!wall || !user) {
+      setCopyMessage("Family wall or user session not ready.");
+      return;
+    }
 
     setGeneratingLink(true);
     setCopyMessage("");
@@ -204,7 +198,8 @@ export default function FamilyWallPage() {
     ]);
 
     if (error) {
-      setCopyMessage("Unable to generate invite link.");
+      console.log("Invite link error:", error);
+      setCopyMessage(error.message || "Unable to generate invite link.");
       setGeneratingLink(false);
       return;
     }
@@ -356,7 +351,6 @@ export default function FamilyWallPage() {
           )}
 
           {wall && <VoiceRemembranceSection wallId={wall.id} />}
-
           {wall && <FamilyPhotoGallerySection wallId={wall.id} />}
 
           <div className="mt-10 rounded-3xl border border-stone-100 bg-stone-50 p-5">
