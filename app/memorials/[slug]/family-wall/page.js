@@ -19,10 +19,6 @@ export default function FamilyWallPage() {
   const [message, setMessage] = useState("");
   const [posting, setPosting] = useState(false);
 
-  const [conversationMessages, setConversationMessages] = useState([]);
-  const [conversationText, setConversationText] = useState("");
-  const [sendingConversation, setSendingConversation] = useState(false);
-
   const [inviteLink, setInviteLink] = useState("");
   const [generatingLink, setGeneratingLink] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
@@ -96,14 +92,6 @@ export default function FamilyWallPage() {
           .order("created_at", { ascending: false });
 
         if (mounted) setPosts(wallPosts || []);
-
-        const { data: wallMessages } = await supabase
-          .from("family_wall_messages")
-          .select("*")
-          .eq("wall_id", existingWall.id)
-          .order("created_at", { ascending: true });
-
-        if (mounted) setConversationMessages(wallMessages || []);
       } catch (error) {
         console.log(error.message);
         if (mounted) setUser(null);
@@ -142,31 +130,6 @@ export default function FamilyWallPage() {
     }
 
     setPosting(false);
-  }
-
-  async function sendConversationMessage() {
-    if (!conversationText.trim() || !wall || !user) return;
-
-    setSendingConversation(true);
-
-    const { data, error } = await supabase
-      .from("family_wall_messages")
-      .insert([
-        {
-          wall_id: wall.id,
-          user_id: user.id,
-          message: conversationText,
-        },
-      ])
-      .select()
-      .single();
-
-    if (!error && data) {
-      setConversationMessages((prev) => [...prev, data]);
-      setConversationText("");
-    }
-
-    setSendingConversation(false);
   }
 
   async function generateInviteLink() {
@@ -230,7 +193,8 @@ export default function FamilyWallPage() {
 
           <p className="mb-7 text-sm leading-relaxed text-stone-500">
             This family wall is private. Please login to access family
-            reflections, conversations, voice remembrance, and family photos.
+            reflections, conversation rooms, voice remembrance, and family
+            photos.
           </p>
 
           <div className="flex flex-col gap-3">
@@ -345,80 +309,24 @@ export default function FamilyWallPage() {
           </section>
 
           <section className="rounded-3xl border border-stone-100 bg-stone-50 p-5">
-            <div className="mb-6 flex items-center justify-between">
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="font-serif text-2xl text-stone-800">
                   Family Conversation
                 </h2>
 
-                <p className="mt-2 text-sm text-stone-500">
-                  A private space for family coordination, support, and quiet
-                  conversation.
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-stone-500">
+                  Enter a private room for family support, coordination,
+                  planning, updates, and ongoing conversations.
                 </p>
               </div>
 
-              <div className="rounded-full bg-white px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
-                Private
-              </div>
-            </div>
-
-            <div className="mb-5 max-h-[420px] space-y-4 overflow-y-auto rounded-3xl border border-stone-100 bg-white p-5">
-              {conversationMessages.length === 0 ? (
-                <div className="py-10 text-center">
-                  <p className="mb-3 text-3xl">💬</p>
-
-                  <h3 className="mb-2 font-serif text-xl text-stone-800">
-                    No conversation yet
-                  </h3>
-
-                  <p className="mx-auto max-w-md text-sm leading-relaxed text-stone-500">
-                    Family members can use this room for updates, support, and
-                    planning.
-                  </p>
-                </div>
-              ) : (
-                conversationMessages.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`max-w-[85%] rounded-2xl px-5 py-4 ${
-                      item.user_id === user.id
-                        ? "ml-auto bg-stone-900 text-white"
-                        : "mr-auto bg-stone-100 text-stone-700"
-                    }`}
-                  >
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {item.message}
-                    </p>
-
-                    <p
-                      className={`mt-2 text-[10px] uppercase tracking-[0.18em] ${
-                        item.user_id === user.id
-                          ? "text-stone-400"
-                          : "text-stone-400"
-                      }`}
-                    >
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <input
-                value={conversationText}
-                onChange={(e) => setConversationText(e.target.value)}
-                placeholder="Write a family message..."
-                className="flex-1 rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none"
-              />
-
-              <button
-                onClick={sendConversationMessage}
-                disabled={sendingConversation}
-                className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
+              <Link
+                href={`/memorials/${slug}/family-wall/conversation`}
+                className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white"
               >
-                {sendingConversation ? "Sending..." : "Send"}
-              </button>
+                Open Conversation Room
+              </Link>
             </div>
           </section>
 
