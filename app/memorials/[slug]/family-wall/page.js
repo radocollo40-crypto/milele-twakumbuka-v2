@@ -24,6 +24,10 @@ export default function FamilyWallPage() {
   const [inviteMessage, setInviteMessage] = useState("");
   const [members, setMembers] = useState([]);
 
+  const [inviteLink, setInviteLink] = useState("");
+  const [generatingLink, setGeneratingLink] = useState(false);
+  const [copyMessage, setCopyMessage] = useState("");
+
   useEffect(() => {
     let mounted = true;
 
@@ -181,6 +185,42 @@ export default function FamilyWallPage() {
     setInviting(false);
   }
 
+  async function generateInviteLink() {
+    if (!wall || !user) return;
+
+    setGeneratingLink(true);
+    setCopyMessage("");
+
+    const token =
+      crypto.randomUUID().replace(/-/g, "") +
+      Math.random().toString(36).substring(2);
+
+    const { error } = await supabase.from("family_wall_invites").insert([
+      {
+        family_wall_id: wall.id,
+        invite_token: token,
+        created_by: user.id,
+      },
+    ]);
+
+    if (error) {
+      setCopyMessage("Unable to generate invite link.");
+      setGeneratingLink(false);
+      return;
+    }
+
+    setInviteLink(`${window.location.origin}/invite/${token}`);
+    setCopyMessage("Invite link generated.");
+    setGeneratingLink(false);
+  }
+
+  async function copyInviteLink() {
+    if (!inviteLink) return;
+
+    await navigator.clipboard.writeText(inviteLink);
+    setCopyMessage("Invite link copied.");
+  }
+
   if (checkingAuth) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-stone-50">
@@ -234,9 +274,7 @@ export default function FamilyWallPage() {
             Private Space
           </p>
 
-          <h1 className="font-serif text-4xl text-stone-900">
-            Family Wall
-          </h1>
+          <h1 className="font-serif text-4xl text-stone-900">Family Wall</h1>
 
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-stone-500">
             A protected remembrance space for family memories, private
@@ -322,8 +360,48 @@ export default function FamilyWallPage() {
           {wall && <FamilyPhotoGallerySection wallId={wall.id} />}
 
           <div className="mt-10 rounded-3xl border border-stone-100 bg-stone-50 p-5">
+            <div className="mb-8 rounded-3xl border border-stone-100 bg-white p-5">
+              <h3 className="mb-4 font-serif text-xl text-stone-800">
+                Family Invite Link
+              </h3>
+
+              <p className="mb-4 text-sm leading-relaxed text-stone-500">
+                Generate a secure link and share it through WhatsApp or other
+                family groups.
+              </p>
+
+              <button
+                onClick={generateInviteLink}
+                disabled={generatingLink}
+                className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {generatingLink ? "Generating..." : "Generate Invite Link"}
+              </button>
+
+              {inviteLink && (
+                <div className="mt-5">
+                  <input
+                    readOnly
+                    value={inviteLink}
+                    className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm"
+                  />
+
+                  <button
+                    onClick={copyInviteLink}
+                    className="mt-3 rounded-full border border-stone-200 px-5 py-2 text-sm"
+                  >
+                    Copy Link
+                  </button>
+                </div>
+              )}
+
+              {copyMessage && (
+                <p className="mt-4 text-sm text-stone-500">{copyMessage}</p>
+              )}
+            </div>
+
             <h3 className="mb-4 font-serif text-xl text-stone-800">
-              Invite Family
+              Invite Family by Email
             </h3>
 
             <div className="flex flex-col gap-4 sm:flex-row">
