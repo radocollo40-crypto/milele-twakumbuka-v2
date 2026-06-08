@@ -13,7 +13,6 @@ export default function FamilyConversationPage() {
   const [profile, setProfile] = useState(null);
   const [wall, setWall] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [members, setMembers] = useState([]);
 
   const [text, setText] = useState("");
   const [fullName, setFullName] = useState("");
@@ -59,7 +58,6 @@ export default function FamilyConversationPage() {
 
       if (currentWall) {
         await registerMember(currentWall.id, user.id);
-        await loadMembers(currentWall.id);
 
         const { data } = await supabase
           .from("family_wall_messages")
@@ -138,37 +136,13 @@ export default function FamilyConversationPage() {
     ]);
   }
 
-  async function loadMembers(wallId) {
-    const { data: memberRows } = await supabase
-      .from("family_wall_members")
-      .select("user_id")
-      .eq("wall_id", wallId);
-
-    if (!memberRows?.length) {
-      setMembers([]);
-      return;
-    }
-
-    const userIds = memberRows.map((m) => m.user_id).filter(Boolean);
-
-    if (!userIds.length) {
-      setMembers([]);
-      return;
-    }
-
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, full_name")
-      .in("id", userIds);
-
-    setMembers(profiles || []);
-  }
-
   function getSenderName() {
     if (profile?.full_name?.trim()) return profile.full_name.trim();
+
     if (user?.user_metadata?.full_name?.trim()) {
       return user.user_metadata.full_name.trim();
     }
+
     return "";
   }
 
@@ -196,10 +170,6 @@ export default function FamilyConversationPage() {
       full_name: fullName.trim(),
       email: user.email || "",
     });
-
-    if (wall?.id) {
-      await loadMembers(wall.id);
-    }
 
     setNameSaving(false);
   }
@@ -290,9 +260,11 @@ export default function FamilyConversationPage() {
       <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
         <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
           <h1 className="mb-4 font-serif text-3xl">Login Required</h1>
+
           <p className="mb-6 text-sm text-stone-500">
             Please login to enter this private family conversation.
           </p>
+
           <Link
             href={`/login?redirect=/memorials/${slug}/family-wall/conversation`}
             className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
@@ -340,9 +312,6 @@ export default function FamilyConversationPage() {
     );
   }
 
-  const visibleMembers = members.slice(0, 6);
-  const remainingMembers = Math.max(members.length - 6, 0);
-
   return (
     <main className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
       <header className="border-b border-stone-100 bg-white px-5 py-5">
@@ -351,6 +320,7 @@ export default function FamilyConversationPage() {
             <p className="mb-1 text-xs uppercase tracking-[0.25em] text-stone-400">
               Private Family Wall
             </p>
+
             <h1 className="font-serif text-2xl text-stone-900">
               Family Conversation
             </h1>
@@ -373,40 +343,15 @@ export default function FamilyConversationPage() {
           </p>
         </div>
 
-        <div className="mb-5 rounded-3xl border border-stone-100 bg-white p-5">
-          <p className="mb-1 text-xs uppercase tracking-[0.25em] text-stone-400">
-            Family Members
-          </p>
-
-          <h2 className="mb-4 font-serif text-2xl text-stone-900">
-            {members.length} {members.length === 1 ? "Member" : "Members"}
-          </h2>
-
-          <div className="flex flex-wrap gap-2">
-            {visibleMembers.map((member) => (
-              <span
-                key={member.id}
-                className="rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-600"
-              >
-                {member.full_name}
-              </span>
-            ))}
-
-            {remainingMembers > 0 && (
-              <span className="rounded-full bg-stone-200 px-4 py-2 text-sm text-stone-700">
-                +{remainingMembers} more
-              </span>
-            )}
-          </div>
-        </div>
-
         <div className="flex-1 space-y-4 overflow-y-auto rounded-3xl border border-stone-100 bg-white p-5">
           {messages.length === 0 ? (
             <div className="flex min-h-[320px] flex-col items-center justify-center text-center">
               <p className="mb-3 text-4xl">💬</p>
+
               <h2 className="mb-2 font-serif text-2xl text-stone-800">
                 No conversation yet
               </h2>
+
               <p className="max-w-md text-sm text-stone-500">
                 Start the family conversation with an update, memory, or simple
                 message of support.
