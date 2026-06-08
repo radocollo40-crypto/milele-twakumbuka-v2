@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabase";
 export default function SignupPage() {
   const router = useRouter();
 
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -18,7 +19,13 @@ export default function SignupPage() {
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.signUp({
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      setMessage("Please fill in your full name, email, and password.");
+      setLoading(false);
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -29,8 +36,17 @@ export default function SignupPage() {
       return;
     }
 
-    setMessage("Account created successfully.");
+    if (data?.user) {
+      await supabase.from("profiles").insert([
+        {
+          id: data.user.id,
+          full_name: fullName.trim(),
+          email: email.trim(),
+        },
+      ]);
+    }
 
+    setMessage("Account created successfully.");
     setLoading(false);
 
     setTimeout(() => {
@@ -56,6 +72,19 @@ export default function SignupPage() {
           </p>
 
           <div className="space-y-5">
+            <div>
+              <label className="mb-2 block text-sm text-stone-500">
+                Full Name
+              </label>
+
+              <input
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
+              />
+            </div>
+
             <div>
               <label className="mb-2 block text-sm text-stone-500">
                 Email
@@ -103,10 +132,7 @@ export default function SignupPage() {
               </Link>
             </p>
 
-            <Link
-              href="/"
-              className="block text-center text-sm text-stone-400"
-            >
+            <Link href="/" className="block text-center text-sm text-stone-400">
               Back home
             </Link>
           </div>
