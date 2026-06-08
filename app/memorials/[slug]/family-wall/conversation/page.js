@@ -39,7 +39,7 @@ export default function FamilyConversationPage() {
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       setProfile(profileData || null);
 
@@ -118,8 +118,8 @@ export default function FamilyConversationPage() {
       return profile.full_name.trim();
     }
 
-    if (user?.email) {
-      return user.email;
+    if (user?.user_metadata?.full_name?.trim()) {
+      return user.user_metadata.full_name.trim();
     }
 
     return "Family Member";

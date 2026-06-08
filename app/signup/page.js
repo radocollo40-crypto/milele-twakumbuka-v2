@@ -26,8 +26,13 @@ export default function SignupPage() {
     }
 
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
+      options: {
+        data: {
+          full_name: fullName.trim(),
+        },
+      },
     });
 
     if (error) {
@@ -37,16 +42,23 @@ export default function SignupPage() {
     }
 
     if (data?.user) {
-      await supabase.from("profiles").insert([
-        {
-          id: data.user.id,
-          full_name: fullName.trim(),
-          email: email.trim(),
-        },
-      ]);
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert([
+          {
+            id: data.user.id,
+            full_name: fullName.trim(),
+            email: email.trim(),
+          },
+        ]);
+
+      if (profileError) {
+        console.error("Profile error:", profileError);
+      }
     }
 
     setMessage("Account created successfully.");
+
     setLoading(false);
 
     setTimeout(() => {
@@ -132,7 +144,10 @@ export default function SignupPage() {
               </Link>
             </p>
 
-            <Link href="/" className="block text-center text-sm text-stone-400">
+            <Link
+              href="/"
+              className="block text-center text-sm text-stone-400"
+            >
               Back home
             </Link>
           </div>
