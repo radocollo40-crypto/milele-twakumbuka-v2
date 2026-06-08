@@ -56,6 +56,8 @@ export default function FamilyConversationPage() {
       setWall(currentWall);
 
       if (currentWall) {
+        await registerMember(currentWall.id, user.id);
+
         const { data } = await supabase
           .from("family_wall_messages")
           .select("*")
@@ -114,10 +116,46 @@ export default function FamilyConversationPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  async function registerMember(wallId, userId) {
+    const { data: existing } = await supabase
+      .from("family_wall_members")
+      .select("id")
+      .eq("wall_id", wallId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) return;
+
+    await supabase.from("family_wall_members").insert([
+      {
+        wall_id: wallId,
+        user_id: userId,
+        role: "member",
+      },
+    ]);
+  }
+
   function getSenderName() {
     if (profile?.full_name?.trim()) return profile.full_name.trim();
-    if (user?.user_metadata?.full_name?.trim()) return user.user_metadata.full_name.trim();
+    if (user?.user_metadata?.full_name?.trim()) {
+      return user.user_metadata.full_name.trim();
+    }
     return "";
+  }
+
+  function getFamilyMemberNames() {
+    const names = new Set();
+
+    const currentName = getSenderName();
+    if (currentName) names.add(currentName);
+
+    messages.forEach((item) => {
+      if (item.sender_name?.trim()) {
+        names.add(item.sender_name.trim());
+      }
+    });
+
+    return Array.from(names);
   }
 
   async function saveName() {
@@ -284,6 +322,8 @@ export default function FamilyConversationPage() {
     );
   }
 
+  const familyMembers = getFamilyMemberNames();
+
   return (
     <main className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
       <header className="border-b border-stone-100 bg-white px-5 py-5">
@@ -312,6 +352,31 @@ export default function FamilyConversationPage() {
             A private room for family support, updates, planning, and quiet
             conversation.
           </p>
+        </div>
+
+        <div className="mb-5 rounded-3xl border border-stone-100 bg-white p-5">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="mb-1 text-xs uppercase tracking-[0.25em] text-stone-400">
+                Family Members
+              </p>
+              <h2 className="font-serif text-2xl text-stone-900">
+                {familyMembers.length}{" "}
+                {familyMembers.length === 1 ? "Member" : "Members"}
+              </h2>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {familyMembers.map((name) => (
+              <span
+                key={name}
+                className="rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-600"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto rounded-3xl border border-stone-100 bg-white p-5">
