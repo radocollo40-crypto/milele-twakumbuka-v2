@@ -13,6 +13,8 @@ export default function FamilyConversationPage() {
   const [profile, setProfile] = useState(null);
   const [wall, setWall] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [members, setMembers] = useState([]);
+
   const [text, setText] = useState("");
   const [fullName, setFullName] = useState("");
   const [nameSaving, setNameSaving] = useState(false);
@@ -57,6 +59,7 @@ export default function FamilyConversationPage() {
 
       if (currentWall) {
         await registerMember(currentWall.id, user.id);
+        await loadMembers(currentWall.id);
 
         const { data } = await supabase
           .from("family_wall_messages")
@@ -135,27 +138,38 @@ export default function FamilyConversationPage() {
     ]);
   }
 
+  async function loadMembers(wallId) {
+    const { data: memberRows } = await supabase
+      .from("family_wall_members")
+      .select("user_id")
+      .eq("wall_id", wallId);
+
+    if (!memberRows?.length) {
+      setMembers([]);
+      return;
+    }
+
+    const userIds = memberRows.map((m) => m.user_id).filter(Boolean);
+
+    if (!userIds.length) {
+      setMembers([]);
+      return;
+    }
+
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", userIds);
+
+    setMembers(profiles || []);
+  }
+
   function getSenderName() {
     if (profile?.full_name?.trim()) return profile.full_name.trim();
     if (user?.user_metadata?.full_name?.trim()) {
       return user.user_metadata.full_name.trim();
     }
     return "";
-  }
-
-  function getFamilyMemberNames() {
-    const names = new Set();
-
-    const currentName = getSenderName();
-    if (currentName) names.add(currentName);
-
-    messages.forEach((item) => {
-      if (item.sender_name?.trim()) {
-        names.add(item.sender_name.trim());
-      }
-    });
-
-    return Array.from(names);
   }
 
   async function saveName() {
@@ -182,6 +196,10 @@ export default function FamilyConversationPage() {
       full_name: fullName.trim(),
       email: user.email || "",
     });
+
+    if (wall?.id) {
+      await loadMembers(wall.id);
+    }
 
     setNameSaving(false);
   }
@@ -322,7 +340,8 @@ export default function FamilyConversationPage() {
     );
   }
 
-  const familyMembers = getFamilyMemberNames();
+  const visibleMembers = members.slice(0, 6);
+  const remainingMembers = Math.max(members.length - 6, 0);
 
   return (
     <main className="flex min-h-screen flex-col bg-stone-50 text-stone-900">
@@ -355,27 +374,29 @@ export default function FamilyConversationPage() {
         </div>
 
         <div className="mb-5 rounded-3xl border border-stone-100 bg-white p-5">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div>
-              <p className="mb-1 text-xs uppercase tracking-[0.25em] text-stone-400">
-                Family Members
-              </p>
-              <h2 className="font-serif text-2xl text-stone-900">
-                {familyMembers.length}{" "}
-                {familyMembers.length === 1 ? "Member" : "Members"}
-              </h2>
-            </div>
-          </div>
+          <p className="mb-1 text-xs uppercase tracking-[0.25em] text-stone-400">
+            Family Members
+          </p>
+
+          <h2 className="mb-4 font-serif text-2xl text-stone-900">
+            {members.length} {members.length === 1 ? "Member" : "Members"}
+          </h2>
 
           <div className="flex flex-wrap gap-2">
-            {familyMembers.map((name) => (
+            {visibleMembers.map((member) => (
               <span
-                key={name}
+                key={member.id}
                 className="rounded-full bg-stone-100 px-4 py-2 text-sm text-stone-600"
               >
-                {name}
+                {member.full_name}
               </span>
             ))}
+
+            {remainingMembers > 0 && (
+              <span className="rounded-full bg-stone-200 px-4 py-2 text-sm text-stone-700">
+                +{remainingMembers} more
+              </span>
+            )}
           </div>
         </div>
 
