@@ -14,6 +14,8 @@ export default function FamilyConversationPage() {
   const [wall, setWall] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
@@ -42,6 +44,7 @@ export default function FamilyConversationPage() {
         .maybeSingle();
 
       setProfile(profileData || null);
+      setFullName(profileData?.full_name || user?.user_metadata?.full_name || "");
 
       const { data: walls } = await supabase
         .from("family_walls")
@@ -103,9 +106,7 @@ export default function FamilyConversationPage() {
     loadConversation();
 
     return () => {
-      if (channel) {
-        supabase.removeChannel(channel);
-      }
+      if (channel) supabase.removeChannel(channel);
     };
   }, [slug]);
 
@@ -114,25 +115,52 @@ export default function FamilyConversationPage() {
   }, [messages]);
 
   function getSenderName() {
-    if (profile?.full_name?.trim()) {
-      return profile.full_name.trim();
+    if (profile?.full_name?.trim()) return profile.full_name.trim();
+    if (user?.user_metadata?.full_name?.trim()) return user.user_metadata.full_name.trim();
+    return "";
+  }
+
+  async function saveName() {
+    if (!fullName.trim() || !user) return;
+
+    setNameSaving(true);
+
+    const { error } = await supabase.from("profiles").upsert([
+      {
+        id: user.id,
+        full_name: fullName.trim(),
+        email: user.email || "",
+      },
+    ]);
+
+    if (error) {
+      alert(error.message || "Unable to save name.");
+      setNameSaving(false);
+      return;
     }
 
-    if (user?.user_metadata?.full_name?.trim()) {
-      return user.user_metadata.full_name.trim();
-    }
+    setProfile({
+      id: user.id,
+      full_name: fullName.trim(),
+      email: user.email || "",
+    });
 
-    return "Family Member";
+    setNameSaving(false);
   }
 
   async function sendMessage() {
     if (!text.trim() || !wall || !user) return;
 
+    const senderName = getSenderName();
+
+    if (!senderName) {
+      alert("Please enter your name first.");
+      return;
+    }
+
     setSending(true);
 
     const messageToSend = text.trim();
-    const senderName = getSenderName();
-
     setText("");
 
     const { error } = await supabase.from("family_wall_messages").insert([
@@ -167,9 +195,7 @@ export default function FamilyConversationPage() {
 
     await supabase
       .from("family_wall_messages")
-      .update({
-        message: editingText.trim(),
-      })
+      .update({ message: editingText.trim() })
       .eq("id", id)
       .eq("user_id", user.id);
 
@@ -181,7 +207,6 @@ export default function FamilyConversationPage() {
     if (!confirmDelete || !user) return;
 
     const previousMessages = messages;
-
     setMessages((prev) => prev.filter((item) => item.id !== id));
 
     const { error } = await supabase
@@ -209,17 +234,51 @@ export default function FamilyConversationPage() {
       <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
         <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
           <h1 className="mb-4 font-serif text-3xl">Login Required</h1>
-
           <p className="mb-6 text-sm text-stone-500">
             Please login to enter this private family conversation.
           </p>
-
           <Link
             href={`/login?redirect=/memorials/${slug}/family-wall/conversation`}
             className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
           >
             Login
           </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!getSenderName()) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
+        <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-sm">
+          <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
+            Family Identity
+          </p>
+
+          <h1 className="mb-4 font-serif text-3xl text-stone-900">
+            Enter Your Name
+          </h1>
+
+          <p className="mb-6 text-sm leading-relaxed text-stone-500">
+            This name will appear in the private family conversation so members
+            know who is speaking.
+          </p>
+
+          <input
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Full name"
+            className="mb-4 w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
+          />
+
+          <button
+            onClick={saveName}
+            disabled={nameSaving}
+            className="w-full rounded-full bg-stone-900 px-7 py-3.5 text-sm font-medium text-white disabled:opacity-60"
+          >
+            {nameSaving ? "Saving name..." : "Continue"}
+          </button>
         </div>
       </main>
     );
@@ -233,7 +292,6 @@ export default function FamilyConversationPage() {
             <p className="mb-1 text-xs uppercase tracking-[0.25em] text-stone-400">
               Private Family Wall
             </p>
-
             <h1 className="font-serif text-2xl text-stone-900">
               Family Conversation
             </h1>
@@ -260,11 +318,9 @@ export default function FamilyConversationPage() {
           {messages.length === 0 ? (
             <div className="flex min-h-[320px] flex-col items-center justify-center text-center">
               <p className="mb-3 text-4xl">💬</p>
-
               <h2 className="mb-2 font-serif text-2xl text-stone-800">
                 No conversation yet
               </h2>
-
               <p className="max-w-md text-sm text-stone-500">
                 Start the family conversation with an update, memory, or simple
                 message of support.
