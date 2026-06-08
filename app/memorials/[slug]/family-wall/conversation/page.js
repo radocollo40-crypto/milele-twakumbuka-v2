@@ -10,6 +10,7 @@ export default function FamilyConversationPage() {
   const bottomRef = useRef(null);
 
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [wall, setWall] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -33,6 +34,14 @@ export default function FamilyConversationPage() {
         setLoading(false);
         return;
       }
+
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      setProfile(profileData || null);
 
       const { data: walls } = await supabase
         .from("family_walls")
@@ -104,21 +113,41 @@ export default function FamilyConversationPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  function getSenderName() {
+    if (profile?.full_name?.trim()) {
+      return profile.full_name.trim();
+    }
+
+    if (user?.email) {
+      return user.email;
+    }
+
+    return "Family Member";
+  }
+
   async function sendMessage() {
     if (!text.trim() || !wall || !user) return;
 
     setSending(true);
 
-    const messageToSend = text;
+    const messageToSend = text.trim();
+    const senderName = getSenderName();
+
     setText("");
 
-    await supabase.from("family_wall_messages").insert([
+    const { error } = await supabase.from("family_wall_messages").insert([
       {
         wall_id: wall.id,
         user_id: user.id,
+        sender_name: senderName,
         message: messageToSend,
       },
     ]);
+
+    if (error) {
+      setText(messageToSend);
+      alert(error.message || "Unable to send message.");
+    }
 
     setSending(false);
   }
@@ -139,7 +168,7 @@ export default function FamilyConversationPage() {
     await supabase
       .from("family_wall_messages")
       .update({
-        message: editingText,
+        message: editingText.trim(),
       })
       .eq("id", id)
       .eq("user_id", user.id);
@@ -245,6 +274,9 @@ export default function FamilyConversationPage() {
             messages.map((item) => {
               const isOwnMessage = item.user_id === user.id;
               const isEditing = editingId === item.id;
+              const displayName = isOwnMessage
+                ? "You"
+                : item.sender_name || "Family Member";
 
               return (
                 <div
@@ -286,8 +318,12 @@ export default function FamilyConversationPage() {
                       </p>
 
                       <div className="mt-3 flex items-center justify-between gap-3">
-                        <p className="text-[10px] uppercase tracking-[0.18em] text-stone-400">
-                          {isOwnMessage ? "You" : "Family Member"} ·{" "}
+                        <p
+                          className={`text-[10px] uppercase tracking-[0.18em] ${
+                            isOwnMessage ? "text-stone-300" : "text-stone-400"
+                          }`}
+                        >
+                          {displayName} ·{" "}
                           {new Date(item.created_at).toLocaleString()}
                         </p>
 
