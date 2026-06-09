@@ -12,6 +12,7 @@ export default function FamilyConversationPage() {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [wall, setWall] = useState(null);
+  const [hasAccess, setHasAccess] = useState(false);
   const [messages, setMessages] = useState([]);
 
   const [text, setText] = useState("");
@@ -56,52 +57,77 @@ export default function FamilyConversationPage() {
       const currentWall = walls?.[0] || null;
       setWall(currentWall);
 
-      if (currentWall) {
-        await registerMember(currentWall.id, user.id);
-
-        const { data } = await supabase
-          .from("family_wall_messages")
-          .select("*")
-          .eq("wall_id", currentWall.id)
-          .order("created_at", { ascending: true });
-
-        setMessages(data || []);
-
-        channel = supabase
-          .channel(`family-wall-messages-${currentWall.id}`)
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-              schema: "public",
-              table: "family_wall_messages",
-              filter: `wall_id=eq.${currentWall.id}`,
-            },
-            (payload) => {
-              if (payload.eventType === "INSERT") {
-                setMessages((prev) => {
-                  const exists = prev.some((item) => item.id === payload.new.id);
-                  return exists ? prev : [...prev, payload.new];
-                });
-              }
-
-              if (payload.eventType === "UPDATE") {
-                setMessages((prev) =>
-                  prev.map((item) =>
-                    item.id === payload.new.id ? payload.new : item
-                  )
-                );
-              }
-
-              if (payload.eventType === "DELETE") {
-                setMessages((prev) =>
-                  prev.filter((item) => item.id !== payload.old.id)
-                );
-              }
-            }
-          )
-          .subscribe();
+      if (!currentWall) {
+        setLoading(false);
+        return;
       }
+
+      let allowed = false;
+
+      if (currentWall.owner_id === user.id) {
+        allowed = true;
+      } else {
+        const { data: membership } = await supabase
+          .from("family_wall_members")
+          .select("id, role, status")
+          .eq("wall_id", currentWall.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+
+        if (membership) {
+          allowed = true;
+        }
+      }
+
+      setHasAccess(allowed);
+
+      if (!allowed) {
+        setLoading(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from("family_wall_messages")
+        .select("*")
+        .eq("wall_id", currentWall.id)
+        .order("created_at", { ascending: true });
+
+      setMessages(data || []);
+
+      channel = supabase
+        .channel(`family-wall-messages-${currentWall.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "family_wall_messages",
+            filter: `wall_id=eq.${currentWall.id}`,
+          },
+          (payload) => {
+            if (payload.eventType === "INSERT") {
+              setMessages((prev) => {
+                const exists = prev.some((item) => item.id === payload.new.id);
+                return exists ? prev : [...prev, payload.new];
+              });
+            }
+
+            if (payload.eventType === "UPDATE") {
+              setMessages((prev) =>
+                prev.map((item) =>
+                  item.id === payload.new.id ? payload.new : item
+                )
+              );
+            }
+
+            if (payload.eventType === "DELETE") {
+              setMessages((prev) =>
+                prev.filter((item) => item.id !== payload.old.id)
+              );
+            }
+          }
+        )
+        .subscribe();
 
       setLoading(false);
     }
@@ -116,25 +142,6 @@ export default function FamilyConversationPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  async function registerMember(wallId, userId) {
-    const { data: existing } = await supabase
-      .from("family_wall_members")
-      .select("id")
-      .eq("wall_id", wallId)
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (existing) return;
-
-    await supabase.from("family_wall_members").insert([
-      {
-        wall_id: wallId,
-        user_id: userId,
-        role: "member",
-      },
-    ]);
-  }
 
   function getSenderName() {
     if (profile?.full_name?.trim()) return profile.full_name.trim();
@@ -175,7 +182,7 @@ export default function FamilyConversationPage() {
   }
 
   async function sendMessage() {
-    if (!text.trim() || !wall || !user) return;
+    if (!text.trim() || !wall || !user || !hasAccess) return;
 
     const senderName = getSenderName();
 
@@ -217,7 +224,7 @@ export default function FamilyConversationPage() {
   }
 
   async function saveEdit(id) {
-    if (!editingText.trim() || !user) return;
+    if (!editingText.trim() || !user || !hasAccess) return;
 
     await supabase
       .from("family_wall_messages")
@@ -230,7 +237,7 @@ export default function FamilyConversationPage() {
 
   async function deleteMessage(id) {
     const confirmDelete = window.confirm("Delete this message?");
-    if (!confirmDelete || !user) return;
+    if (!confirmDelete || !user || !hasAccess) return;
 
     const previousMessages = messages;
     setMessages((prev) => prev.filter((item) => item.id !== id));
@@ -270,6 +277,33 @@ export default function FamilyConversationPage() {
             className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
           >
             Login
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
+        <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
+          <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
+            Private Family Wall
+          </p>
+
+          <h1 className="mb-4 font-serif text-3xl">Access Required</h1>
+
+          <p className="mb-7 text-sm leading-relaxed text-stone-500">
+            You do not currently have access to this private family
+            conversation. Please use an invitation link from the family owner or
+            admin.
+          </p>
+
+          <Link
+            href={`/memorials/${slug}`}
+            className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
+          >
+            Back to Memorial
           </Link>
         </div>
       </main>
