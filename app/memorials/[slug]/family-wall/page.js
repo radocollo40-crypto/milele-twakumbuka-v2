@@ -358,12 +358,21 @@ export default function FamilyWallPage() {
                 </p>
               </div>
 
-              <Link
-                href={`/memorials/${slug}/family-wall/conversation`}
-                className="inline-flex items-center justify-center rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white"
-              >
-                Open Conversation Room
-              </Link>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href={`/memorials/${slug}/family-wall/conversation`}
+                  className="inline-flex items-center justify-center rounded-full bg-stone-900 px-5 py-2.5 text-sm text-white"
+                >
+                  Conversation Room
+                </Link>
+
+                <Link
+                  href={`/memorials/${slug}/family-wall/members`}
+                  className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600 hover:bg-stone-50"
+                >
+                  Family Members
+                </Link>
+              </div>
             </div>
           </section>
 
