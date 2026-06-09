@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function FamilyWallMembersPage() {
   const { slug } = useParams();
+  const router = useRouter();
 
   const [user, setUser] = useState(null);
   const [wall, setWall] = useState(null);
@@ -134,8 +135,6 @@ export default function FamilyWallMembersPage() {
   async function promoteToAdmin(member) {
     if (!canManage || !wall || !hasAccess) return;
 
-    setMessage("");
-
     const { error } = await supabase
       .from("family_wall_members")
       .update({ role: "admin" })
@@ -151,8 +150,6 @@ export default function FamilyWallMembersPage() {
 
   async function demoteToMember(member) {
     if (!canManage || !wall || !hasAccess) return;
-
-    setMessage("");
 
     const { error } = await supabase
       .from("family_wall_members")
@@ -181,8 +178,6 @@ export default function FamilyWallMembersPage() {
 
     if (!confirmRemove) return;
 
-    setMessage("");
-
     const { error } = await supabase
       .from("family_wall_members")
       .delete()
@@ -194,6 +189,29 @@ export default function FamilyWallMembersPage() {
     }
 
     await loadMembers(wall.id, wall.owner_id);
+  }
+
+  async function leaveFamilyWall() {
+    if (!user || !wall || myRole === "owner") return;
+
+    const confirmLeave = window.confirm(
+      "Leave this family wall? You will need a new invitation to rejoin."
+    );
+
+    if (!confirmLeave) return;
+
+    const { error } = await supabase
+      .from("family_wall_members")
+      .delete()
+      .eq("wall_id", wall.id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      setMessage(error.message || "Unable to leave this family wall.");
+      return;
+    }
+
+    router.push(`/memorials/${slug}`);
   }
 
   if (loading) {
@@ -209,11 +227,9 @@ export default function FamilyWallMembersPage() {
       <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
         <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
           <h1 className="mb-4 font-serif text-3xl">Login Required</h1>
-
           <p className="mb-6 text-sm text-stone-500">
             Please login to manage family wall members.
           </p>
-
           <Link
             href={`/login?redirect=/memorials/${slug}/family-wall/members`}
             className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
@@ -232,14 +248,10 @@ export default function FamilyWallMembersPage() {
           <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
             Private Family Wall
           </p>
-
           <h1 className="mb-4 font-serif text-3xl">Access Required</h1>
-
           <p className="mb-7 text-sm leading-relaxed text-stone-500">
             You do not currently have access to view or manage this family wall.
-            Please use an invitation link from the family owner or admin.
           </p>
-
           <Link
             href={`/memorials/${slug}`}
             className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
@@ -280,70 +292,76 @@ export default function FamilyWallMembersPage() {
         )}
 
         <div className="space-y-4 rounded-3xl border border-stone-100 bg-white p-6 shadow-sm">
-          {members.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-stone-200 p-10 text-center">
-              <p className="mb-3 text-4xl">👥</p>
+          {members.map((member) => {
+            const isOwner = member.display_role === "owner";
+            const isSelf = member.user_id === user.id;
 
-              <h2 className="mb-3 font-serif text-2xl text-stone-800">
-                No members found
-              </h2>
+            return (
+              <div
+                key={member.id}
+                className="flex flex-col gap-4 rounded-2xl border border-stone-100 bg-stone-50 p-5 md:flex-row md:items-center md:justify-between"
+              >
+                <div>
+                  <p className="font-medium text-stone-800">
+                    {member.full_name}
+                    {isSelf ? " (You)" : ""}
+                  </p>
 
-              <p className="text-sm text-stone-500">
-                Members will appear here after they accept an invitation.
-              </p>
-            </div>
-          ) : (
-            members.map((member) => {
-              const isOwner = member.display_role === "owner";
-              const isSelf = member.user_id === user.id;
-
-              return (
-                <div
-                  key={member.id}
-                  className="flex flex-col gap-4 rounded-2xl border border-stone-100 bg-stone-50 p-5 md:flex-row md:items-center md:justify-between"
-                >
-                  <div>
-                    <p className="font-medium text-stone-800">
-                      {member.full_name}
-                      {isSelf ? " (You)" : ""}
-                    </p>
-
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-stone-400">
-                      {member.display_role}
-                    </p>
-                  </div>
-
-                  {canManage && !isOwner && (
-                    <div className="flex flex-wrap gap-2">
-                      {member.display_role === "admin" ? (
-                        <button
-                          onClick={() => demoteToMember(member)}
-                          className="rounded-full border border-stone-200 bg-white px-4 py-2 text-xs text-stone-600"
-                        >
-                          Make Member
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => promoteToAdmin(member)}
-                          className="rounded-full border border-stone-200 bg-white px-4 py-2 text-xs text-stone-600"
-                        >
-                          Make Admin
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => removeMember(member)}
-                        className="rounded-full bg-stone-900 px-4 py-2 text-xs text-white"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
+                  <p className="mt-1 text-xs uppercase tracking-[0.2em] text-stone-400">
+                    {member.display_role}
+                  </p>
                 </div>
-              );
-            })
-          )}
+
+                {canManage && !isOwner && (
+                  <div className="flex flex-wrap gap-2">
+                    {member.display_role === "admin" ? (
+                      <button
+                        onClick={() => demoteToMember(member)}
+                        className="rounded-full border border-stone-200 bg-white px-4 py-2 text-xs text-stone-600"
+                      >
+                        Make Member
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => promoteToAdmin(member)}
+                        className="rounded-full border border-stone-200 bg-white px-4 py-2 text-xs text-stone-600"
+                      >
+                        Make Admin
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => removeMember(member)}
+                      className="rounded-full bg-stone-900 px-4 py-2 text-xs text-white"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
+
+        {myRole !== "owner" && (
+          <div className="mt-6 rounded-3xl border border-stone-100 bg-white p-6 shadow-sm">
+            <h2 className="mb-2 font-serif text-2xl text-stone-800">
+              Leave Family Wall
+            </h2>
+
+            <p className="mb-5 text-sm leading-relaxed text-stone-500">
+              You can leave this private family wall at any time. To rejoin,
+              you will need another invitation from the family owner or admin.
+            </p>
+
+            <button
+              onClick={leaveFamilyWall}
+              className="rounded-full border border-stone-300 bg-white px-6 py-3 text-sm text-stone-700"
+            >
+              Leave Family Wall
+            </button>
+          </div>
+        )}
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link
