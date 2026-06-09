@@ -14,6 +14,7 @@ export default function FamilyWallPage() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [wall, setWall] = useState(null);
+  const [memberRole, setMemberRole] = useState("member");
 
   const [posts, setPosts] = useState([]);
   const [message, setMessage] = useState("");
@@ -22,6 +23,8 @@ export default function FamilyWallPage() {
   const [inviteLink, setInviteLink] = useState("");
   const [generatingLink, setGeneratingLink] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
+
+  const canManageWall = memberRole === "owner" || memberRole === "admin";
 
   useEffect(() => {
     let mounted = true;
@@ -79,11 +82,38 @@ export default function FamilyWallPage() {
           }
 
           existingWall = createdWall;
+
+          await supabase.from("family_wall_members").insert([
+            {
+              wall_id: existingWall.id,
+              user_id: currentUser.id,
+              invited_email: currentUser.email || "",
+              status: "accepted",
+              role: "owner",
+            },
+          ]);
         }
 
         if (!mounted) return;
 
         setWall(existingWall);
+
+        let role = "member";
+
+        if (existingWall.owner_id === currentUser.id) {
+          role = "owner";
+        } else {
+          const { data: membership } = await supabase
+            .from("family_wall_members")
+            .select("role")
+            .eq("wall_id", existingWall.id)
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+
+          role = membership?.role || "member";
+        }
+
+        setMemberRole(role);
 
         const { data: wallPosts } = await supabase
           .from("family_wall_posts")
@@ -133,8 +163,8 @@ export default function FamilyWallPage() {
   }
 
   async function generateInviteLink() {
-    if (!wall || !user) {
-      setCopyMessage("Family wall or user session not ready.");
+    if (!wall || !user || !canManageWall) {
+      setCopyMessage("Only the wall owner or an admin can generate invites.");
       return;
     }
 
@@ -230,6 +260,10 @@ export default function FamilyWallPage() {
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-stone-500">
             A protected remembrance space for family memories, private
             conversations, voice tributes, photographs, and reflection.
+          </p>
+
+          <p className="mt-4 inline-flex rounded-full bg-stone-100 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
+            {memberRole}
           </p>
         </div>
 
@@ -334,47 +368,49 @@ export default function FamilyWallPage() {
 
           {wall && <FamilyPhotoGallerySection wallId={wall.id} />}
 
-          <section className="rounded-3xl border border-stone-100 bg-stone-50 p-5">
-            <div className="rounded-3xl border border-stone-100 bg-white p-5">
-              <h3 className="mb-4 font-serif text-xl text-stone-800">
-                Invite Family
-              </h3>
+          {canManageWall && (
+            <section className="rounded-3xl border border-stone-100 bg-stone-50 p-5">
+              <div className="rounded-3xl border border-stone-100 bg-white p-5">
+                <h3 className="mb-4 font-serif text-xl text-stone-800">
+                  Invite Family
+                </h3>
 
-              <p className="mb-4 text-sm leading-relaxed text-stone-500">
-                Generate a secure link and share it through WhatsApp or other
-                family groups.
-              </p>
+                <p className="mb-4 text-sm leading-relaxed text-stone-500">
+                  Generate a secure link and share it through WhatsApp or other
+                  family groups.
+                </p>
 
-              <button
-                onClick={generateInviteLink}
-                disabled={generatingLink}
-                className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
-              >
-                {generatingLink ? "Generating..." : "Generate Invite Link"}
-              </button>
+                <button
+                  onClick={generateInviteLink}
+                  disabled={generatingLink}
+                  className="rounded-full bg-stone-900 px-6 py-3 text-sm font-medium text-white disabled:opacity-60"
+                >
+                  {generatingLink ? "Generating..." : "Generate Invite Link"}
+                </button>
 
-              {inviteLink && (
-                <div className="mt-5">
-                  <input
-                    readOnly
-                    value={inviteLink}
-                    className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm"
-                  />
+                {inviteLink && (
+                  <div className="mt-5">
+                    <input
+                      readOnly
+                      value={inviteLink}
+                      className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-5 py-4 text-sm"
+                    />
 
-                  <button
-                    onClick={copyInviteLink}
-                    className="mt-3 rounded-full border border-stone-200 px-5 py-2 text-sm"
-                  >
-                    Copy Link
-                  </button>
-                </div>
-              )}
+                    <button
+                      onClick={copyInviteLink}
+                      className="mt-3 rounded-full border border-stone-200 px-5 py-2 text-sm"
+                    >
+                      Copy Link
+                    </button>
+                  </div>
+                )}
 
-              {copyMessage && (
-                <p className="mt-4 text-sm text-stone-500">{copyMessage}</p>
-              )}
-            </div>
-          </section>
+                {copyMessage && (
+                  <p className="mt-4 text-sm text-stone-500">{copyMessage}</p>
+                )}
+              </div>
+            </section>
+          )}
         </div>
 
         <div className="mt-10">
