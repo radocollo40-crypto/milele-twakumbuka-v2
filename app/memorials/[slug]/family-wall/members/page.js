@@ -11,6 +11,7 @@ export default function FamilyWallMembersPage() {
   const [user, setUser] = useState(null);
   const [wall, setWall] = useState(null);
   const [myRole, setMyRole] = useState("member");
+  const [hasAccess, setHasAccess] = useState(false);
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -52,21 +53,32 @@ export default function FamilyWallMembersPage() {
     }
 
     let role = "member";
+    let allowed = false;
 
     if (currentWall.owner_id === user.id) {
       role = "owner";
+      allowed = true;
     } else {
       const { data: membership } = await supabase
         .from("family_wall_members")
-        .select("role")
+        .select("role, status")
         .eq("wall_id", currentWall.id)
         .eq("user_id", user.id)
         .maybeSingle();
 
-      role = membership?.role || "member";
+      if (membership) {
+        role = membership.role || "member";
+        allowed = true;
+      }
     }
 
     setMyRole(role);
+    setHasAccess(allowed);
+
+    if (!allowed) {
+      setLoading(false);
+      return;
+    }
 
     await loadMembers(currentWall.id, currentWall.owner_id);
     setLoading(false);
@@ -109,10 +121,7 @@ export default function FamilyWallMembersPage() {
 
       return {
         ...member,
-        full_name:
-          profile?.full_name ||
-          member.invited_email ||
-          "Family Member",
+        full_name: profile?.full_name || member.invited_email || "Family Member",
         email: profile?.email || member.invited_email || "",
         display_role:
           member.user_id === ownerId ? "owner" : member.role || "member",
@@ -123,7 +132,7 @@ export default function FamilyWallMembersPage() {
   }
 
   async function promoteToAdmin(member) {
-    if (!canManage || !wall) return;
+    if (!canManage || !wall || !hasAccess) return;
 
     setMessage("");
 
@@ -141,7 +150,7 @@ export default function FamilyWallMembersPage() {
   }
 
   async function demoteToMember(member) {
-    if (!canManage || !wall) return;
+    if (!canManage || !wall || !hasAccess) return;
 
     setMessage("");
 
@@ -159,7 +168,7 @@ export default function FamilyWallMembersPage() {
   }
 
   async function removeMember(member) {
-    if (!canManage || !wall) return;
+    if (!canManage || !wall || !hasAccess) return;
 
     if (member.user_id === wall.owner_id) {
       setMessage("The wall owner cannot be removed.");
@@ -210,6 +219,32 @@ export default function FamilyWallMembersPage() {
             className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
           >
             Login
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
+        <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
+          <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
+            Private Family Wall
+          </p>
+
+          <h1 className="mb-4 font-serif text-3xl">Access Required</h1>
+
+          <p className="mb-7 text-sm leading-relaxed text-stone-500">
+            You do not currently have access to view or manage this family wall.
+            Please use an invitation link from the family owner or admin.
+          </p>
+
+          <Link
+            href={`/memorials/${slug}`}
+            className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
+          >
+            Back to Memorial
           </Link>
         </div>
       </main>
