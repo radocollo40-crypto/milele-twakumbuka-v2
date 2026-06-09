@@ -73,7 +73,7 @@ export default function InvitePage() {
       .from("family_wall_members")
       .select("*")
       .eq("wall_id", wall.id)
-      .eq("invited_email", user.email)
+      .eq("user_id", user.id)
       .maybeSingle();
 
     if (existingMember) {
@@ -84,7 +84,8 @@ export default function InvitePage() {
     const { error } = await supabase.from("family_wall_members").insert([
       {
         wall_id: wall.id,
-        invited_email: user.email,
+        user_id: user.id,
+        invited_email: user.email || "",
         status: "accepted",
         role: "member",
       },
@@ -133,7 +134,7 @@ export default function InvitePage() {
             </Link>
 
             <Link
-              href="/signup"
+              href={`/signup?redirect=/invite/${token}`}
               className="rounded-full border border-stone-200 bg-white px-7 py-3 text-sm font-medium text-stone-700"
             >
               Create Account
