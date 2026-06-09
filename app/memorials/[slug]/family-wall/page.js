@@ -8,11 +8,11 @@ import VoiceRemembranceSection from "../../../../components/VoiceRemembranceSect
 import FamilyPhotoGallerySection from "../../../../components/FamilyPhotoGallerySection";
 
 export default function FamilyWallPage() {
-  const params = useParams();
-  const slug = params.slug;
+  const { slug } = useParams();
 
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
   const [wall, setWall] = useState(null);
   const [memberRole, setMemberRole] = useState("member");
 
@@ -30,118 +30,107 @@ export default function FamilyWallPage() {
     wall?.owner_id === user?.id;
 
   useEffect(() => {
-    let mounted = true;
+    loadWall();
+  }, [slug]);
 
-    async function loadWall() {
-      try {
-        const authTimeout = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Auth timeout")), 6000)
-        );
+  async function loadWall() {
+    setCheckingAuth(true);
 
-        const result = await Promise.race([
-          supabase.auth.getUser(),
-          authTimeout,
-        ]);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-        const currentUser = result?.data?.user || null;
+    setUser(user || null);
 
-        if (!mounted) return;
+    if (!user) {
+      setCheckingAuth(false);
+      return;
+    }
 
-        setUser(currentUser);
+    const memorialId = Number(slug);
 
-        if (!currentUser) {
-          setCheckingAuth(false);
-          return;
-        }
+    const { data: walls } = await supabase
+      .from("family_walls")
+      .select("*")
+      .eq("memorial_id", memorialId)
+      .order("created_at", { ascending: true })
+      .limit(1);
 
-        const memorialId = Number(slug);
+    let currentWall = walls?.[0] || null;
 
-        const { data: walls } = await supabase
-          .from("family_walls")
-          .select("*")
-          .eq("memorial_id", memorialId)
-          .order("created_at", { ascending: true })
-          .limit(1);
+    if (!currentWall) {
+      const { data: createdWall, error } = await supabase
+        .from("family_walls")
+        .insert([
+          {
+            memorial_id: memorialId,
+            owner_id: user.id,
+            title: "Family Wall",
+          },
+        ])
+        .select()
+        .single();
 
-        let existingWall = walls?.[0] || null;
+      if (error) {
+        setCheckingAuth(false);
+        return;
+      }
 
-        if (!existingWall) {
-          const { data: createdWall, error: createError } = await supabase
-            .from("family_walls")
-            .insert([
-              {
-                memorial_id: memorialId,
-                owner_id: currentUser.id,
-                title: "Family Wall",
-              },
-            ])
-            .select()
-            .single();
+      currentWall = createdWall;
 
-          if (createError) {
-            console.log(createError.message);
-            setCheckingAuth(false);
-            return;
-          }
+      await supabase.from("family_wall_members").insert([
+        {
+          wall_id: currentWall.id,
+          user_id: user.id,
+          invited_email: user.email || "",
+          status: "accepted",
+          role: "owner",
+        },
+      ]);
+    }
 
-          existingWall = createdWall;
+    setWall(currentWall);
 
-          await supabase.from("family_wall_members").insert([
-            {
-              wall_id: existingWall.id,
-              user_id: currentUser.id,
-              invited_email: currentUser.email || "",
-              status: "accepted",
-              role: "owner",
-            },
-          ]);
-        }
+    let role = "member";
+    let allowed = false;
 
-        if (!mounted) return;
+    if (currentWall.owner_id === user.id) {
+      role = "owner";
+      allowed = true;
+    } else {
+      const { data: membership } = await supabase
+        .from("family_wall_members")
+        .select("role, status")
+        .eq("wall_id", currentWall.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-        setWall(existingWall);
-
-        let role = "member";
-
-        if (existingWall.owner_id === currentUser.id) {
-          role = "owner";
-        } else {
-          const { data: membership } = await supabase
-            .from("family_wall_members")
-            .select("role")
-            .eq("wall_id", existingWall.id)
-            .eq("user_id", currentUser.id)
-            .maybeSingle();
-
-          role = membership?.role || "member";
-        }
-
-        setMemberRole(role);
-
-        const { data: wallPosts } = await supabase
-          .from("family_wall_posts")
-          .select("*")
-          .eq("wall_id", existingWall.id)
-          .order("created_at", { ascending: false });
-
-        if (mounted) setPosts(wallPosts || []);
-      } catch (error) {
-        console.log(error.message);
-        if (mounted) setUser(null);
-      } finally {
-        if (mounted) setCheckingAuth(false);
+      if (membership) {
+        role = membership.role || "member";
+        allowed = true;
       }
     }
 
-    loadWall();
+    setMemberRole(role);
+    setHasAccess(allowed);
 
-    return () => {
-      mounted = false;
-    };
-  }, [slug]);
+    if (!allowed) {
+      setCheckingAuth(false);
+      return;
+    }
+
+    const { data: wallPosts } = await supabase
+      .from("family_wall_posts")
+      .select("*")
+      .eq("wall_id", currentWall.id)
+      .order("created_at", { ascending: false });
+
+    setPosts(wallPosts || []);
+    setCheckingAuth(false);
+  }
 
   async function createPost() {
-    if (!message.trim() || !wall || !user) return;
+    if (!message.trim() || !wall || !user || !hasAccess) return;
 
     setPosting(true);
 
@@ -199,7 +188,6 @@ export default function FamilyWallPage() {
 
   async function copyInviteLink() {
     if (!inviteLink) return;
-
     await navigator.clipboard.writeText(inviteLink);
     setCopyMessage("Invite link copied.");
   }
@@ -216,35 +204,42 @@ export default function FamilyWallPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center text-stone-900">
         <div className="max-w-md rounded-3xl border border-stone-100 bg-white p-8 shadow-sm">
+          <h1 className="mb-4 font-serif text-3xl">Login Required</h1>
+          <p className="mb-7 text-sm leading-relaxed text-stone-500">
+            Please login to access this private family wall.
+          </p>
+          <Link
+            href={`/login?redirect=/memorials/${slug}/family-wall`}
+            className="rounded-full bg-stone-900 px-7 py-3 text-sm font-medium text-white"
+          >
+            Login
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!hasAccess) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center text-stone-900">
+        <div className="max-w-md rounded-3xl border border-stone-100 bg-white p-8 shadow-sm">
           <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
             Private Family Wall
           </p>
 
-          <h1 className="mb-4 font-serif text-3xl text-stone-900">
-            Login Required
-          </h1>
+          <h1 className="mb-4 font-serif text-3xl">Access Required</h1>
 
           <p className="mb-7 text-sm leading-relaxed text-stone-500">
-            This family wall is private. Please login to access family
-            reflections, conversation rooms, voice remembrance, and family
-            photos.
+            You do not currently have access to this private family wall. Please
+            use an invitation link from the family owner or admin.
           </p>
 
-          <div className="flex flex-col gap-3">
-            <Link
-              href={`/login?redirect=/memorials/${slug}/family-wall`}
-              className="rounded-full bg-stone-900 px-7 py-3 text-sm font-medium text-white"
-            >
-              Login
-            </Link>
-
-            <Link
-              href={`/memorials/${slug}`}
-              className="rounded-full border border-stone-200 bg-white px-7 py-3 text-sm font-medium text-stone-700"
-            >
-              Back to memorial
-            </Link>
-          </div>
+          <Link
+            href={`/memorials/${slug}`}
+            className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
+          >
+            Back to Memorial
+          </Link>
         </div>
       </main>
     );
