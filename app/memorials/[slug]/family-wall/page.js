@@ -24,7 +24,10 @@ export default function FamilyWallPage() {
   const [generatingLink, setGeneratingLink] = useState(false);
   const [copyMessage, setCopyMessage] = useState("");
 
-  const canManageWall = memberRole === "owner" || memberRole === "admin";
+  const canManageWall =
+    memberRole === "owner" ||
+    memberRole === "admin" ||
+    wall?.owner_id === user?.id;
 
   useEffect(() => {
     let mounted = true;
