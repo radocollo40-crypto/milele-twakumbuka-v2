@@ -1,7 +1,6 @@
 import Link from "next/link";
 import FadeInSection from "../components/FadeInSection";
 import { supabase } from "@/lib/supabase";
-import AuthButtons from "../components/AuthButtons";
 
 const CATEGORIES = [
   {
@@ -65,47 +64,6 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
-      <header className="sticky top-0 z-50 border-b border-stone-100 bg-stone-50/90 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 md:py-5">
-          <Link
-            href="/"
-            className="font-serif text-xl text-stone-900 sm:text-2xl"
-          >
-            Milele Twakumbuka
-          </Link>
-
-          <div className="hidden items-center gap-8 text-sm font-medium text-stone-600 md:flex">
-            <Link href="/" className="hover:text-stone-900">Home</Link>
-            <Link href="/memorials" className="hover:text-stone-900">Memorials</Link>
-            <Link href="/categories" className="hover:text-stone-900">Categories</Link>
-            <Link href="/tragedies" className="hover:text-stone-900">Tragedies</Link>
-            <Link href="/add-loved-one" className="hover:text-stone-900">Add Loved One</Link>
-            <Link href="/about" className="hover:text-stone-900">About</Link>
-            <AuthButtons />
-          </div>
-
-          <div className="md:hidden">
-            <details className="relative">
-              <summary className="cursor-pointer list-none rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700">
-                Menu
-              </summary>
-
-              <div className="absolute right-0 mt-3 w-56 rounded-2xl border border-stone-100 bg-white p-4 shadow-xl">
-                <div className="flex flex-col gap-4 text-sm text-stone-700">
-                  <Link href="/">Home</Link>
-                  <Link href="/memorials">Memorials</Link>
-                  <Link href="/categories">Categories</Link>
-                  <Link href="/tragedies">Tragedies</Link>
-                  <Link href="/add-loved-one">Add Loved One</Link>
-                  <Link href="/about">About</Link>
-                  <AuthButtons />
-                </div>
-              </div>
-            </details>
-          </div>
-        </nav>
-      </header>
-
       <header className="relative border-b border-stone-100 py-20 sm:py-24 md:py-40">
         <div className="absolute inset-0">
           <img
@@ -274,6 +232,34 @@ export default async function HomePage() {
 
       <FadeInSection>
         <section className="border-t border-stone-100 py-14 sm:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-stone-100 bg-white p-6 sm:p-8 md:flex-row md:items-center">
+              <div className="max-w-xl space-y-2">
+                <p className="text-xs font-medium uppercase tracking-widest text-stone-400">
+                  Service Notices
+                </p>
+                <h2 className="font-serif text-2xl text-stone-800">
+                  Funeral Notices
+                </h2>
+                <p className="text-sm font-light leading-relaxed text-stone-500">
+                  Share funeral service dates, burial details, venues, and
+                  family announcements connected to a loved one’s memorial.
+                </p>
+              </div>
+
+              <Link
+                href="/funeral-announcements"
+                className="w-full rounded-full bg-stone-900 px-6 py-3 text-center text-sm font-medium text-white sm:w-auto"
+              >
+                View Funeral Notices
+              </Link>
+            </div>
+          </div>
+        </section>
+      </FadeInSection>
+
+      <FadeInSection>
+        <section className="border-t border-stone-100 py-14 sm:py-16">
           <div className="mx-auto max-w-4xl space-y-7 px-5 text-center sm:px-6 lg:px-8">
             <h2 className="font-serif text-2xl text-stone-800">
               A living archive of memory
@@ -305,6 +291,7 @@ export default async function HomePage() {
           <Link href="/memorials">Memorials</Link>
           <Link href="/categories">Categories</Link>
           <Link href="/tragedies">Tragedies</Link>
+          <Link href="/funeral-announcements">Funeral Notices</Link>
           <Link href="/add-loved-one">Add Loved One</Link>
           <Link href="/about">About</Link>
         </div>
