@@ -19,6 +19,16 @@ export default function FuneralAnnouncementsPage() {
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
 
+  const [editingId, setEditingId] = useState(null);
+  const [editMemorialId, setEditMemorialId] = useState("");
+  const [editServiceDate, setEditServiceDate] = useState("");
+  const [editServiceTime, setEditServiceTime] = useState("");
+  const [editVenueName, setEditVenueName] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [editAnnouncement, setEditAnnouncement] = useState("");
+  const [editContactName, setEditContactName] = useState("");
+  const [editContactPhone, setEditContactPhone] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -102,6 +112,102 @@ export default function FuneralAnnouncementsPage() {
     setSaving(false);
   }
 
+  function startEdit(item) {
+    setEditingId(item.id);
+    setEditMemorialId(String(item.memorial_id || ""));
+    setEditServiceDate(item.service_date || "");
+    setEditServiceTime(item.service_time || "");
+    setEditVenueName(item.venue_name || "");
+    setEditLocation(item.location || "");
+    setEditAnnouncement(item.announcement || "");
+    setEditContactName(item.contact_name || "");
+    setEditContactPhone(item.contact_phone || "");
+    setMessage("");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditMemorialId("");
+    setEditServiceDate("");
+    setEditServiceTime("");
+    setEditVenueName("");
+    setEditLocation("");
+    setEditAnnouncement("");
+    setEditContactName("");
+    setEditContactPhone("");
+  }
+
+  async function saveEdit(id) {
+    setMessage("");
+
+    if (!user) {
+      setMessage("Please login to edit this notice.");
+      return;
+    }
+
+    if (
+      !editMemorialId ||
+      !editServiceDate ||
+      !editVenueName.trim() ||
+      !editLocation.trim()
+    ) {
+      setMessage("Please fill in the memorial, date, venue, and location.");
+      return;
+    }
+
+    setSaving(true);
+
+    const { error } = await supabase
+      .from("funeral_announcements")
+      .update({
+        memorial_id: Number(editMemorialId),
+        service_date: editServiceDate,
+        service_time: editServiceTime.trim(),
+        venue_name: editVenueName.trim(),
+        location: editLocation.trim(),
+        announcement: editAnnouncement.trim(),
+        contact_name: editContactName.trim(),
+        contact_phone: editContactPhone.trim(),
+      })
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      setMessage(error.message || "Unable to update notice.");
+      setSaving(false);
+      return;
+    }
+
+    setMessage("Funeral notice updated successfully.");
+    cancelEdit();
+    await loadPage();
+    setSaving(false);
+  }
+
+  async function deleteAnnouncement(id) {
+    if (!user) return;
+
+    const confirmDelete = window.confirm(
+      "Delete this funeral notice? This cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from("funeral_announcements")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      setMessage(error.message || "Unable to delete notice.");
+      return;
+    }
+
+    setMessage("Funeral notice deleted.");
+    await loadPage();
+  }
+
   function getMemorialName(id) {
     const memorial = memorials.find((item) => item.id === id);
     return memorial?.name || "Memorial";
@@ -163,77 +269,41 @@ export default function FuneralAnnouncementsPage() {
             )}
 
             <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm text-stone-500">
-                  Memorial
-                </label>
+              <InputSelect
+                label="Memorial"
+                value={memorialId}
+                onChange={setMemorialId}
+                memorials={memorials}
+              />
 
-                <select
-                  value={memorialId}
-                  onChange={(e) => setMemorialId(e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none"
-                >
-                  <option value="">Select memorial</option>
+              <InputField
+                label="Service Date"
+                type="date"
+                value={serviceDate}
+                onChange={setServiceDate}
+              />
 
-                  {memorials.map((memorial) => (
-                    <option key={memorial.id} value={memorial.id}>
-                      {memorial.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <InputField
+                label="Service Time"
+                value={serviceTime}
+                onChange={setServiceTime}
+                placeholder="Example: 10:00 AM"
+              />
 
-              <div>
-                <label className="mb-2 block text-sm text-stone-500">
-                  Service Date
-                </label>
+              <InputField
+                label="Venue Name"
+                value={venueName}
+                onChange={setVenueName}
+                placeholder="Example: All Saints Cathedral"
+              />
 
-                <input
-                  type="date"
-                  value={serviceDate}
-                  onChange={(e) => setServiceDate(e.target.value)}
-                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-stone-500">
-                  Service Time
-                </label>
-
-                <input
-                  value={serviceTime}
-                  onChange={(e) => setServiceTime(e.target.value)}
-                  placeholder="Example: 10:00 AM"
-                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-stone-500">
-                  Venue Name
-                </label>
-
-                <input
-                  value={venueName}
-                  onChange={(e) => setVenueName(e.target.value)}
-                  placeholder="Example: All Saints Cathedral"
-                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="mb-2 block text-sm text-stone-500">
-                  Location
-                </label>
-
-                <input
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder="Example: Nairobi, Kenya"
-                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-                />
-              </div>
+              <InputField
+                label="Location"
+                value={location}
+                onChange={setLocation}
+                placeholder="Example: Nairobi, Kenya"
+                full
+              />
 
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm text-stone-500">
@@ -249,31 +319,19 @@ export default function FuneralAnnouncementsPage() {
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm text-stone-500">
-                  Contact Name
-                </label>
+              <InputField
+                label="Contact Name"
+                value={contactName}
+                onChange={setContactName}
+                placeholder="Optional"
+              />
 
-                <input
-                  value={contactName}
-                  onChange={(e) => setContactName(e.target.value)}
-                  placeholder="Optional"
-                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm text-stone-500">
-                  Contact Phone
-                </label>
-
-                <input
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="Optional"
-                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-                />
-              </div>
+              <InputField
+                label="Contact Phone"
+                value={contactPhone}
+                onChange={setContactPhone}
+                placeholder="Optional"
+              />
             </div>
 
             {message && (
@@ -292,16 +350,22 @@ export default function FuneralAnnouncementsPage() {
           </section>
         )}
 
+        {message && !showForm && (
+          <p className="mb-6 rounded-2xl bg-white p-4 text-sm text-stone-600 shadow-sm">
+            {message}
+          </p>
+        )}
+
         <section>
           <h2 className="mb-6 font-serif text-2xl text-stone-800">
-            Upcoming Announcements
+            Upcoming Funeral & Memorial Services
           </h2>
 
           {announcements.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-stone-200 bg-white p-10 text-center">
               <p className="mb-3 text-4xl">🕊️</p>
               <h3 className="mb-3 font-serif text-2xl text-stone-800">
-                No announcements yet
+                No notices yet
               </h3>
               <p className="text-sm text-stone-500">
                 Funeral and memorial service notices will appear here.
@@ -309,53 +373,205 @@ export default function FuneralAnnouncementsPage() {
             </div>
           ) : (
             <div className="grid gap-5 md:grid-cols-2">
-              {announcements.map((item) => (
-                <article
-                  key={item.id}
-                  className="rounded-3xl border border-stone-100 bg-white p-6 shadow-sm"
-                >
-                  <p className="mb-3 text-xs uppercase tracking-[0.25em] text-stone-400">
-                    {new Date(item.service_date).toLocaleDateString()}
-                    {item.service_time ? ` · ${item.service_time}` : ""}
-                  </p>
+              {announcements.map((item) => {
+                const isOwner = user?.id === item.user_id;
+                const isEditing = editingId === item.id;
 
-                  <h3 className="font-serif text-2xl text-stone-900">
-                    {getMemorialName(item.memorial_id)}
-                  </h3>
-
-                  <p className="mt-2 text-sm text-stone-500">
-                    {item.venue_name}
-                  </p>
-
-                  <p className="mt-1 text-sm text-stone-500">
-                    {item.location}
-                  </p>
-
-                  {item.announcement && (
-                    <p className="mt-5 whitespace-pre-wrap text-sm leading-relaxed text-stone-600">
-                      {item.announcement}
-                    </p>
-                  )}
-
-                  {(item.contact_name || item.contact_phone) && (
-                    <div className="mt-5 rounded-2xl bg-stone-50 p-4 text-sm text-stone-500">
-                      {item.contact_name && <p>{item.contact_name}</p>}
-                      {item.contact_phone && <p>{item.contact_phone}</p>}
-                    </div>
-                  )}
-
-                  <Link
-                    href={`/memorials/${item.memorial_id}`}
-                    className="mt-5 inline-block text-sm text-stone-500 underline underline-offset-4"
+                return (
+                  <article
+                    key={item.id}
+                    className="rounded-3xl border border-stone-100 bg-white p-6 shadow-sm"
                   >
-                    View memorial
-                  </Link>
-                </article>
-              ))}
+                    {isEditing ? (
+                      <div className="space-y-5">
+                        <InputSelect
+                          label="Memorial"
+                          value={editMemorialId}
+                          onChange={setEditMemorialId}
+                          memorials={memorials}
+                        />
+
+                        <InputField
+                          label="Service Date"
+                          type="date"
+                          value={editServiceDate}
+                          onChange={setEditServiceDate}
+                        />
+
+                        <InputField
+                          label="Service Time"
+                          value={editServiceTime}
+                          onChange={setEditServiceTime}
+                        />
+
+                        <InputField
+                          label="Venue Name"
+                          value={editVenueName}
+                          onChange={setEditVenueName}
+                        />
+
+                        <InputField
+                          label="Location"
+                          value={editLocation}
+                          onChange={setEditLocation}
+                        />
+
+                        <div>
+                          <label className="mb-2 block text-sm text-stone-500">
+                            Family Message
+                          </label>
+
+                          <textarea
+                            rows="4"
+                            value={editAnnouncement}
+                            onChange={(e) =>
+                              setEditAnnouncement(e.target.value)
+                            }
+                            className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
+                          />
+                        </div>
+
+                        <InputField
+                          label="Contact Name"
+                          value={editContactName}
+                          onChange={setEditContactName}
+                        />
+
+                        <InputField
+                          label="Contact Phone"
+                          value={editContactPhone}
+                          onChange={setEditContactPhone}
+                        />
+
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            onClick={() => saveEdit(item.id)}
+                            disabled={saving}
+                            className="rounded-full bg-stone-900 px-5 py-2.5 text-sm text-white disabled:opacity-60"
+                          >
+                            {saving ? "Saving..." : "Save Changes"}
+                          </button>
+
+                          <button
+                            onClick={cancelEdit}
+                            className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="mb-3 text-xs uppercase tracking-[0.25em] text-stone-400">
+                          {new Date(item.service_date).toLocaleDateString()}
+                          {item.service_time ? ` · ${item.service_time}` : ""}
+                        </p>
+
+                        <h3 className="font-serif text-2xl text-stone-900">
+                          {getMemorialName(item.memorial_id)}
+                        </h3>
+
+                        <p className="mt-2 text-sm text-stone-500">
+                          {item.venue_name}
+                        </p>
+
+                        <p className="mt-1 text-sm text-stone-500">
+                          {item.location}
+                        </p>
+
+                        {item.announcement && (
+                          <p className="mt-5 whitespace-pre-wrap text-sm leading-relaxed text-stone-600">
+                            {item.announcement}
+                          </p>
+                        )}
+
+                        {(item.contact_name || item.contact_phone) && (
+                          <div className="mt-5 rounded-2xl bg-stone-50 p-4 text-sm text-stone-500">
+                            {item.contact_name && <p>{item.contact_name}</p>}
+                            {item.contact_phone && <p>{item.contact_phone}</p>}
+                          </div>
+                        )}
+
+                        <div className="mt-5 flex flex-wrap items-center gap-3">
+                          <Link
+                            href={`/memorials/${item.memorial_id}`}
+                            className="text-sm text-stone-500 underline underline-offset-4"
+                          >
+                            View memorial
+                          </Link>
+
+                          {isOwner && (
+                            <>
+                              <button
+                                onClick={() => startEdit(item)}
+                                className="text-sm text-stone-500 underline underline-offset-4"
+                              >
+                                Edit
+                              </button>
+
+                              <button
+                                onClick={() => deleteAnnouncement(item.id)}
+                                className="text-sm text-red-500 underline underline-offset-4"
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </article>
+                );
+              })}
             </div>
           )}
         </section>
       </div>
     </main>
+  );
+}
+
+function InputField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder = "",
+  full = false,
+}) {
+  return (
+    <div className={full ? "md:col-span-2" : ""}>
+      <label className="mb-2 block text-sm text-stone-500">{label}</label>
+
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
+      />
+    </div>
+  );
+}
+
+function InputSelect({ label, value, onChange, memorials }) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm text-stone-500">{label}</label>
+
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-2xl border border-stone-200 bg-white px-5 py-4 text-sm outline-none"
+      >
+        <option value="">Select memorial</option>
+
+        {memorials.map((memorial) => (
+          <option key={memorial.id} value={memorial.id}>
+            {memorial.name}
+          </option>
+        ))}
+      </select>
+    </div>
   );
 }
