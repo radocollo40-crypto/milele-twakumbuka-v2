@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Navbar from "../components/Navbar";
 import FadeInSection from "../components/FadeInSection";
 import { supabase } from "@/lib/supabase";
 
@@ -52,10 +53,7 @@ async function getFeaturedMemorials() {
     .order("created_at", { ascending: false })
     .limit(4);
 
-  if (error || !data) {
-    return [];
-  }
-
+  if (error || !data) return [];
   return data;
 }
 
@@ -64,6 +62,8 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
+      <Navbar />
+
       <header className="relative border-b border-stone-100 py-20 sm:py-24 md:py-40">
         <div className="absolute inset-0">
           <img
