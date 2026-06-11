@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import ReportButton from "@/components/ReportButton";
 
 export default function FuneralAnnouncementsPage() {
   const [user, setUser] = useState(null);
@@ -518,6 +519,12 @@ export default function FuneralAnnouncementsPage() {
                             </>
                           )}
                         </div>
+
+                        <ReportButton
+                          contentType="funeral_notice"
+                          contentId={item.id}
+                          pageUrl={`/funeral-announcements`}
+                        />
                       </>
                     )}
                   </article>
