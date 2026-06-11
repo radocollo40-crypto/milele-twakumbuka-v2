@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import MemorialCondolencesSection from "../../../components/MemorialCondolencesSection";
 import CandleSection from "../../../components/CandleSection";
 import FlowerSection from "../../../components/FlowerSection";
+import ReportButton from "../../../components/ReportButton";
 
 async function getMemorial(slug) {
   const numericId = Number(slug);
@@ -200,6 +201,12 @@ export default async function MemorialDetailPage({ params }) {
                   </p>
                 </div>
               </div>
+
+              <ReportButton
+                contentType="memorial"
+                contentId={memorial.id}
+                pageUrl={`/memorials/${memorial.id}`}
+              />
             </div>
 
             <Link
@@ -212,8 +219,8 @@ export default async function MemorialDetailPage({ params }) {
 
               <p className="mb-6 text-sm font-light leading-relaxed text-stone-400">
                 A protected remembrance space for family reflections,
-                conversations, voice memories, photographs, and future
-                family storytelling.
+                conversations, voice memories, photographs, and future family
+                storytelling.
               </p>
 
               <div className="w-full rounded-2xl bg-white py-3 text-center text-sm font-medium text-stone-900">
