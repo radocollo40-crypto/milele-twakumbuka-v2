@@ -9,12 +9,34 @@ export default function Footer() {
 
       <div className="mb-8 flex flex-wrap justify-center gap-5 text-sm text-stone-500 sm:gap-7">
         <Link href="/">Home</Link>
-        <Link href="/memorials">Memorials</Link>
-        <Link href="/categories">Categories</Link>
-        <Link href="/tragedies">Tragedies</Link>
-        <Link href="/funeral-announcements">Funeral Notices</Link>
-        <Link href="/add-loved-one">Add Loved One</Link>
-        <Link href="/about">About</Link>
+
+        <Link href="/memorials">
+          Memorials
+        </Link>
+
+        <Link href="/categories">
+          Categories
+        </Link>
+
+        <Link href="/tragedies">
+          Tragedies
+        </Link>
+
+        <Link href="/funeral-announcements">
+          Funeral Notices
+        </Link>
+
+        <Link href="/community-guidelines">
+          Community Guidelines
+        </Link>
+
+        <Link href="/add-loved-one">
+          Add Loved One
+        </Link>
+
+        <Link href="/about">
+          About
+        </Link>
       </div>
 
       <p className="mx-auto max-w-xl text-sm font-light leading-relaxed text-stone-400">
