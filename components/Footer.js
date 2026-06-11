@@ -30,6 +30,14 @@ export default function Footer() {
           Community Guidelines
         </Link>
 
+        <Link href="/privacy-policy">
+          Privacy Policy
+        </Link>
+
+        <Link href="/terms">
+          Terms & Conditions
+        </Link>
+
         <Link href="/add-loved-one">
           Add Loved One
         </Link>
