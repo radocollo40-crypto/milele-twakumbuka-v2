@@ -82,6 +82,55 @@ export default function AdminPage() {
     setMessage(`Report marked as ${status}.`);
   }
 
+  async function deleteReportedContent(report) {
+    setMessage("");
+
+    if (!report?.content_type || !report?.content_id) {
+      setMessage("Unable to identify reported content.");
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Delete this ${report.content_type.replace("_", " ")}? This cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    if (report.content_type === "memorial") {
+      const { error } = await supabase
+        .from("memorials")
+        .delete()
+        .eq("id", Number(report.content_id));
+
+      if (error) {
+        setMessage(error.message || "Unable to delete memorial.");
+        return;
+      }
+
+      await updateReportStatus(report.id, "resolved");
+      setMessage("Memorial deleted and report marked resolved.");
+      return;
+    }
+
+    if (report.content_type === "funeral_notice") {
+      const { error } = await supabase
+        .from("funeral_announcements")
+        .delete()
+        .eq("id", Number(report.content_id));
+
+      if (error) {
+        setMessage(error.message || "Unable to delete funeral notice.");
+        return;
+      }
+
+      await updateReportStatus(report.id, "resolved");
+      setMessage("Funeral notice deleted and report marked resolved.");
+      return;
+    }
+
+    setMessage("This content type cannot be deleted from the dashboard yet.");
+  }
+
   function getContentLink(report) {
     if (report.page_url) return report.page_url;
 
@@ -223,91 +272,106 @@ export default function AdminPage() {
               </p>
             </div>
           ) : (
-            reports.map((report) => (
-              <article
-                key={report.id}
-                className="rounded-3xl border border-stone-100 bg-white p-6 shadow-sm"
-              >
-                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <p className="mb-2 text-xs uppercase tracking-[0.25em] text-stone-400">
-                      {report.content_type} · Report #{report.id}
-                    </p>
+            reports.map((report) => {
+              const canDelete =
+                report.content_type === "memorial" ||
+                report.content_type === "funeral_notice";
 
-                    <h2 className="font-serif text-2xl text-stone-900">
-                      {report.reason || "Reported content"}
-                    </h2>
+              return (
+                <article
+                  key={report.id}
+                  className="rounded-3xl border border-stone-100 bg-white p-6 shadow-sm"
+                >
+                  <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <p className="mb-2 text-xs uppercase tracking-[0.25em] text-stone-400">
+                        {report.content_type} · Report #{report.id}
+                      </p>
 
-                    <p className="mt-2 text-xs text-stone-400">
-                      Submitted:{" "}
-                      {report.created_at
-                        ? new Date(report.created_at).toLocaleString()
-                        : "Unknown date"}
-                    </p>
+                      <h2 className="font-serif text-2xl text-stone-900">
+                        {report.reason || "Reported content"}
+                      </h2>
+
+                      <p className="mt-2 text-xs text-stone-400">
+                        Submitted:{" "}
+                        {report.created_at
+                          ? new Date(report.created_at).toLocaleString()
+                          : "Unknown date"}
+                      </p>
+                    </div>
+
+                    <span className="rounded-full bg-stone-100 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
+                      {report.status || "pending"}
+                    </span>
                   </div>
 
-                  <span className="rounded-full bg-stone-100 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
-                    {report.status || "pending"}
-                  </span>
-                </div>
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <div className="rounded-2xl bg-stone-50 p-4">
+                      <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
+                        Content
+                      </p>
 
-                <div className="grid gap-5 md:grid-cols-2">
-                  <div className="rounded-2xl bg-stone-50 p-4">
-                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
-                      Content
-                    </p>
+                      <p className="text-sm text-stone-600">
+                        Type: {report.content_type}
+                      </p>
 
-                    <p className="text-sm text-stone-600">
-                      Type: {report.content_type}
-                    </p>
+                      <p className="mt-1 text-sm text-stone-600">
+                        ID: {report.content_id}
+                      </p>
+                    </div>
 
-                    <p className="mt-1 text-sm text-stone-600">
-                      ID: {report.content_id}
-                    </p>
+                    <div className="rounded-2xl bg-stone-50 p-4">
+                      <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
+                        Report Details
+                      </p>
+
+                      <p className="text-sm text-stone-600">
+                        {report.details || "No additional details provided."}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="rounded-2xl bg-stone-50 p-4">
-                    <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
-                      Report Details
-                    </p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <Link
+                      href={getContentLink(report)}
+                      className="rounded-full bg-stone-900 px-5 py-2.5 text-sm text-white"
+                    >
+                      Open Content
+                    </Link>
 
-                    <p className="text-sm text-stone-600">
-                      {report.details || "No additional details provided."}
-                    </p>
+                    <button
+                      onClick={() => updateReportStatus(report.id, "reviewed")}
+                      className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
+                    >
+                      Mark Reviewed
+                    </button>
+
+                    <button
+                      onClick={() => updateReportStatus(report.id, "resolved")}
+                      className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
+                    >
+                      Mark Resolved
+                    </button>
+
+                    <button
+                      onClick={() => updateReportStatus(report.id, "dismissed")}
+                      className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
+                    >
+                      Dismiss
+                    </button>
+
+                    {canDelete && (
+                      <button
+                        onClick={() => deleteReportedContent(report)}
+                        className="rounded-full bg-red-50 px-5 py-2.5 text-sm text-red-600"
+                      >
+                        Delete Content
+                      </button>
+                    )}
                   </div>
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <Link
-                    href={getContentLink(report)}
-                    className="rounded-full bg-stone-900 px-5 py-2.5 text-sm text-white"
-                  >
-                    Open Content
-                  </Link>
-
-                  <button
-                    onClick={() => updateReportStatus(report.id, "reviewed")}
-                    className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
-                  >
-                    Mark Reviewed
-                  </button>
-
-                  <button
-                    onClick={() => updateReportStatus(report.id, "resolved")}
-                    className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
-                  >
-                    Mark Resolved
-                  </button>
-
-                  <button
-                    onClick={() => updateReportStatus(report.id, "dismissed")}
-                    className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
-                  >
-                    Dismiss
-                  </button>
-                </div>
-              </article>
-            ))
+                </article>
+              );
+            })
           )}
         </section>
       </div>
