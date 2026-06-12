@@ -91,7 +91,10 @@ export default function AdminPage() {
     }
 
     const confirmDelete = window.confirm(
-      `Delete this ${report.content_type.replace("_", " ")}? This cannot be undone.`
+      `Delete this ${report.content_type.replace(
+        "_",
+        " "
+      )}? This cannot be undone.`
     );
 
     if (!confirmDelete) return;
@@ -106,13 +109,7 @@ export default function AdminPage() {
         setMessage(error.message || "Unable to delete memorial.");
         return;
       }
-
-      await updateReportStatus(report.id, "resolved");
-      setMessage("Memorial deleted and report marked resolved.");
-      return;
-    }
-
-    if (report.content_type === "funeral_notice") {
+    } else if (report.content_type === "funeral_notice") {
       const { error } = await supabase
         .from("funeral_announcements")
         .delete()
@@ -122,13 +119,19 @@ export default function AdminPage() {
         setMessage(error.message || "Unable to delete funeral notice.");
         return;
       }
-
-      await updateReportStatus(report.id, "resolved");
-      setMessage("Funeral notice deleted and report marked resolved.");
+    } else {
+      setMessage("This content type cannot be deleted from the dashboard yet.");
       return;
     }
 
-    setMessage("This content type cannot be deleted from the dashboard yet.");
+    await supabase
+      .from("reports")
+      .update({ status: "content_deleted" })
+      .eq("id", report.id);
+
+    setReports((current) => current.filter((item) => item.id !== report.id));
+
+    setMessage("Content deleted and removed from dashboard.");
   }
 
   function getContentLink(report) {
