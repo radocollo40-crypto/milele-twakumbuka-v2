@@ -38,6 +38,10 @@ export default function Footer() {
           Terms & Conditions
         </Link>
 
+        <Link href="/contact">
+          Contact Support
+        </Link>
+
         <Link href="/add-loved-one">
           Add Loved One
         </Link>
