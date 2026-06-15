@@ -23,12 +23,16 @@ export default function Navbar() {
     setOpen(false);
   }, [pathname]);
 
+  function closeMenu() {
+    setOpen(false);
+  }
+
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#faf8f5]/95 backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <Link
           href="/"
-          onClick={() => setOpen(false)}
+          onClick={closeMenu}
           className="shrink-0 font-serif text-xl tracking-wide text-[#2f2f2f] sm:text-2xl"
         >
           Milele Twakumbuka
@@ -63,7 +67,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setOpen(false)}
+                  onClick={closeMenu}
                   className="rounded-2xl px-4 py-3 transition hover:bg-stone-50 hover:text-black"
                 >
                   {link.label}
@@ -71,7 +75,7 @@ export default function Navbar() {
               ))}
 
               <div className="mt-3 border-t border-stone-100 pt-3">
-                <AuthButtons />
+                <AuthButtons mobile onNavigate={closeMenu} />
               </div>
             </div>
           </div>
