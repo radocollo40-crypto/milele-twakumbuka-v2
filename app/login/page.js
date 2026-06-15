@@ -14,6 +14,7 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -50,9 +51,7 @@ function LoginForm() {
             Family Access
           </p>
 
-          <h1 className="mb-4 font-serif text-3xl text-stone-900">
-            Login
-          </h1>
+          <h1 className="mb-4 font-serif text-3xl text-stone-900">Login</h1>
 
           <p className="mb-8 text-sm font-light leading-relaxed text-stone-500">
             Login to manage memorial details, uploads, and private family wall
@@ -79,13 +78,23 @@ function LoginForm() {
                 Password
               </label>
 
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 pr-16 text-sm outline-none"
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-700"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
             {message && (

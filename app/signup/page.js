@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,28 +43,26 @@ export default function SignupPage() {
     }
 
     if (data?.user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .upsert([
-          {
-            id: data.user.id,
-            full_name: fullName.trim(),
-            email: email.trim(),
-          },
-        ]);
+      const { error: profileError } = await supabase.from("profiles").upsert([
+        {
+          id: data.user.id,
+          full_name: fullName.trim(),
+          email: email.trim(),
+        },
+      ]);
 
       if (profileError) {
         console.error("Profile error:", profileError);
       }
     }
 
-    setMessage("Account created successfully.");
+    setMessage("Account created successfully. Please check your email to verify your account.");
 
     setLoading(false);
 
     setTimeout(() => {
-      router.push("/add-loved-one");
-    }, 1200);
+      router.push("/login");
+    }, 1500);
   }
 
   return (
@@ -115,12 +114,22 @@ export default function SignupPage() {
                 Password
               </label>
 
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-2xl border border-stone-200 px-5 py-4 text-sm outline-none"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl border border-stone-200 px-5 py-4 pr-16 text-sm outline-none"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-stone-400 hover:text-stone-700"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
             {message && (
@@ -144,10 +153,7 @@ export default function SignupPage() {
               </Link>
             </p>
 
-            <Link
-              href="/"
-              className="block text-center text-sm text-stone-400"
-            >
+            <Link href="/" className="block text-center text-sm text-stone-400">
               Back home
             </Link>
           </div>
