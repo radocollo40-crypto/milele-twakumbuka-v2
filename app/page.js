@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -47,19 +50,32 @@ const CATEGORIES = [
   },
 ];
 
-async function getFeaturedMemorials() {
-  const { data, error } = await supabase
-    .from("memorials")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(4);
+export default function HomePage() {
+  const [featuredMemorials, setFeaturedMemorials] = useState([]);
+  const [loadingMemorials, setLoadingMemorials] = useState(true);
 
-  if (error || !data) return [];
-  return data;
-}
+  useEffect(() => {
+    async function loadFeaturedMemorials() {
+      setLoadingMemorials(true);
 
-export default async function HomePage() {
-  const featuredMemorials = await getFeaturedMemorials();
+      const { data, error } = await supabase
+        .from("memorials")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(8);
+
+      if (error) {
+        console.error("Homepage memorials error:", error);
+        setFeaturedMemorials([]);
+      } else {
+        setFeaturedMemorials(data || []);
+      }
+
+      setLoadingMemorials(false);
+    }
+
+    loadFeaturedMemorials();
+  }, []);
 
   return (
     <div className="min-h-screen bg-stone-50 text-stone-900">
@@ -123,7 +139,11 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {featuredMemorials.length === 0 ? (
+          {loadingMemorials ? (
+            <div className="rounded-2xl border border-stone-100 bg-white p-8 text-center text-sm text-stone-400">
+              Loading memorials...
+            </div>
+          ) : featuredMemorials.length === 0 ? (
             <div className="rounded-2xl border border-stone-100 bg-white p-8 text-center text-sm text-stone-400">
               No memorials have been added yet.
             </div>
