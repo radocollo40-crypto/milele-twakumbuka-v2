@@ -92,21 +92,17 @@ export default function HomePage() {
 
         <div className="absolute inset-0 bg-white/45" />
 
-        <div className="relative z-10 mx-auto max-w-4xl space-y-6 px-5 text-center sm:px-6 md:space-y-7">
+        <div className="relative z-10 mx-auto max-w-4xl space-y-7 px-5 text-center sm:px-6">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-stone-400">
             In Loving Memory
           </p>
 
-          <h1 className="font-serif text-4xl leading-tight text-stone-900 sm:text-5xl md:text-6xl">
-            Milele Twakumbuka
-          </h1>
-
-          <p className="mx-auto max-w-2xl text-base font-light leading-relaxed text-stone-500 sm:text-lg">
+          <p className="mx-auto max-w-2xl text-xl font-light leading-relaxed text-stone-600 sm:text-2xl">
             A peaceful and dignified space to honor loved ones, preserve memory,
             celebrate legacy, and remember together.
           </p>
 
-          <div className="flex flex-col items-stretch justify-center gap-3 pt-2 sm:flex-row sm:items-center">
+          <div className="flex flex-col items-stretch justify-center gap-3 pt-3 sm:flex-row sm:items-center">
             <Link
               href="/memorials"
               className="rounded-full bg-stone-900 px-7 py-3.5 text-center text-sm font-medium text-white"
