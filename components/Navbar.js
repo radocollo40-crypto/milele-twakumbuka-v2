@@ -38,7 +38,7 @@ export default function Navbar() {
           <img
             src="/logo.png"
             alt="Milele Twakumbuka"
-            className="h-12 w-12 rounded-full object-contain sm:h-14 sm:w-14"
+            className="h-10 w-auto object-contain sm:h-12"
           />
 
           <div className="min-w-0">
