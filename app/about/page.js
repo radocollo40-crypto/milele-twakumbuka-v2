@@ -88,7 +88,7 @@ export default function AboutPage() {
 
               <p>
                 It is designed for families, communities, public remembrance,
-                and national reflection — without noise, pressure, or spectacle.
+                and national reflection — without pressure or spectacle.
               </p>
 
               <p>
@@ -105,13 +105,13 @@ export default function AboutPage() {
             </p>
 
             <p className="font-serif text-3xl leading-relaxed text-stone-100">
-              We preserve memory with dignity, not noise.
+              We honor every life with dignity and care.
             </p>
 
             <p className="mt-5 text-sm font-light leading-relaxed text-stone-400">
-              Every page should feel respectful, soft, and emotionally safe —
-              whether remembering a loved one, a community figure, or a national
-              tragedy.
+              Every page is designed to provide a respectful, peaceful, and
+              emotionally safe space for families, communities, and future
+              generations to remember with dignity.
             </p>
           </div>
         </div>
