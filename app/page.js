@@ -81,22 +81,18 @@ export default function HomePage() {
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <Navbar />
 
-      <header className="relative border-b border-stone-100 py-20 sm:py-24 md:py-40">
-        <div className="absolute inset-0">
+      <header className="relative overflow-hidden border-b border-stone-100 bg-white py-20 sm:py-24 md:py-40">
+        <div className="absolute inset-0 flex items-center justify-center">
           <img
-            src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop"
-            className="h-full w-full object-cover opacity-10"
+            src="/logo.png"
+            className="h-full max-h-[520px] w-full object-contain opacity-10"
             alt=""
           />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-4xl space-y-6 px-5 text-center sm:px-6 md:space-y-7">
-          <img
-            src="/logo.png"
-            alt="Milele Twakumbuka"
-            className="mx-auto mb-4 h-44 w-auto object-contain sm:h-52 md:h-60"
-          />
+        <div className="absolute inset-0 bg-white/70" />
 
+        <div className="relative z-10 mx-auto max-w-4xl space-y-6 px-5 text-center sm:px-6 md:space-y-7">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-stone-400">
             In Loving Memory
           </p>
