@@ -1,82 +1,65 @@
 import Link from "next/link";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 
 const values = [
   {
     title: "Dignity",
     description:
-      "Every memorial is treated with care, respect, and a quiet sense of honor.",
+      "Every life story is treated with care, respect, and quiet honor.",
     icon: "◇",
+  },
+  {
+    title: "Compassion",
+    description:
+      "The platform is designed to feel gentle, supportive, and emotionally safe.",
+    icon: "♡",
   },
   {
     title: "Memory",
     description:
-      "Stories, names, photographs, and reflections are preserved so they are not forgotten.",
-    icon: "♡",
-  },
-  {
-    title: "Family",
-    description:
-      "A space for loved ones to remember together, share comfort, and protect legacy.",
+      "Names, photographs, stories, and reflections are preserved across generations.",
     icon: "⌁",
   },
   {
-    title: "Community",
+    title: "Legacy",
     description:
-      "Honoring not only individuals, but also shared histories, collective loss, and public remembrance.",
+      "We help families and communities protect the meaning left behind by those they love.",
     icon: "◎",
   },
+];
+
+const offerings = [
+  "Memorial Pages",
+  "Funeral Notices",
+  "Family Conversation Walls",
+  "Candles and Flowers",
+  "Community Tributes",
+  "National Remembrance",
 ];
 
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900">
-      <header className="sticky top-0 z-50 border-b border-stone-100 bg-stone-50/90 backdrop-blur-md">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 md:py-5">
-          <Link href="/" className="font-serif text-xl text-stone-900 sm:text-2xl">
-            Milele Twakumbuka
-          </Link>
+      <Navbar />
 
-          <div className="hidden items-center gap-8 text-sm font-medium text-stone-600 md:flex">
-            <Link href="/">Home</Link>
-            <Link href="/memorials">Memorials</Link>
-            <Link href="/categories">Categories</Link>
-            <Link href="/tragedies">Tragedies</Link>
-            <Link href="/add-loved-one">Add Loved One</Link>
-            <Link href="/about">About</Link>
-          </div>
+      <section className="border-b border-stone-100 bg-white px-5 py-16 text-center sm:px-6 sm:py-20">
+        <div className="mx-auto max-w-4xl">
+          <img
+            src="/logo.png"
+            alt="Milele Twakumbuka"
+            className="mx-auto mb-8 h-auto w-full max-w-[420px] object-contain"
+          />
 
-          <div className="md:hidden">
-            <details className="relative">
-              <summary className="cursor-pointer list-none rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700">
-                Menu
-              </summary>
-
-              <div className="absolute right-0 mt-3 w-56 rounded-2xl border border-stone-100 bg-white p-4 shadow-xl">
-                <div className="flex flex-col gap-4 text-sm text-stone-700">
-                  <Link href="/">Home</Link>
-                  <Link href="/memorials">Memorials</Link>
-                  <Link href="/categories">Categories</Link>
-                  <Link href="/tragedies">Tragedies</Link>
-                  <Link href="/add-loved-one">Add Loved One</Link>
-                  <Link href="/about">About</Link>
-                </div>
-              </div>
-            </details>
-          </div>
-        </nav>
-      </header>
-
-      <section className="px-5 pb-16 pt-24 sm:px-6 sm:pt-32">
-        <div className="mx-auto max-w-5xl">
           <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-stone-400">
             About Milele Twakumbuka
           </p>
 
-          <h1 className="mb-6 max-w-3xl font-serif text-4xl leading-tight text-stone-900 md:text-5xl">
-            A quiet place for memory, dignity, and remembrance.
+          <h1 className="mx-auto max-w-3xl font-serif text-4xl leading-tight text-stone-900 sm:text-5xl">
+            A peaceful digital sanctuary for memory, dignity, and remembrance.
           </h1>
 
-          <p className="max-w-3xl text-base font-light leading-relaxed text-stone-500 sm:text-lg">
+          <p className="mx-auto mt-6 max-w-3xl text-base font-light leading-relaxed text-stone-500 sm:text-lg">
             Milele Twakumbuka was created from a simple belief: every life
             deserves to be remembered with care, and every family deserves a
             dignified space to preserve memory.
@@ -84,24 +67,28 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="px-5 pb-16 sm:px-6">
+      <section className="px-5 py-16 sm:px-6">
         <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-12">
-          <div className="rounded-2xl border border-stone-100 bg-white p-7 sm:p-8 lg:col-span-7">
-            <h2 className="mb-5 font-serif text-2xl text-stone-800">
-              Why this platform exists
+          <div className="rounded-3xl border border-stone-100 bg-white p-7 shadow-sm sm:p-9 lg:col-span-7">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-stone-400">
+              Why We Exist
+            </p>
+
+            <h2 className="mb-5 font-serif text-3xl text-stone-800">
+              Memories should not disappear with time.
             </h2>
 
             <div className="space-y-5 text-sm font-light leading-relaxed text-stone-600 sm:text-base">
               <p>
-                In moments of loss, memory can feel scattered across messages,
-                photographs, conversations, and silence. Milele Twakumbuka brings
-                those memories into one gentle space.
+                In moments of loss, memories are often scattered across phones,
+                conversations, photographs, messages, and silence. Milele
+                Twakumbuka brings those memories into one gentle and lasting
+                place.
               </p>
 
               <p>
                 It is designed for families, communities, public remembrance,
-                and historical reflection — without noise, spectacle, or
-                pressure.
+                and national reflection — without noise, pressure, or spectacle.
               </p>
 
               <p>
@@ -112,12 +99,12 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-stone-900 p-7 text-white sm:p-8 lg:col-span-5">
+          <div className="rounded-3xl bg-stone-900 p-7 text-white shadow-sm sm:p-9 lg:col-span-5">
             <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
               Our Promise
             </p>
 
-            <p className="font-serif text-2xl leading-relaxed text-stone-100">
+            <p className="font-serif text-3xl leading-relaxed text-stone-100">
               We preserve memory with dignity, not noise.
             </p>
 
@@ -130,17 +117,41 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <section className="border-t border-stone-100 bg-white px-5 py-16 sm:px-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-10 text-center">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-stone-400">
+              What We Offer
+            </p>
+
+            <h2 className="font-serif text-3xl text-stone-800">
+              A complete space for remembrance.
+            </h2>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {offerings.map((item) => (
+              <div
+                key={item}
+                className="rounded-2xl border border-stone-100 bg-stone-50 p-5 text-center text-sm font-light text-stone-600"
+              >
+                ♡ {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="border-t border-stone-100 px-5 py-16 sm:px-6">
         <div className="mx-auto max-w-6xl">
           <div className="mb-10">
-            <h2 className="font-serif text-2xl text-stone-800">
-              What guides us
-            </h2>
-
-            <p className="mt-2 max-w-2xl text-sm font-light leading-relaxed text-stone-500">
-              These principles shape the experience, language, and design of the
-              platform.
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.25em] text-stone-400">
+              Our Values
             </p>
+
+            <h2 className="font-serif text-3xl text-stone-800">
+              What guides Milele Twakumbuka
+            </h2>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -168,16 +179,16 @@ export default function AboutPage() {
 
       <section className="border-t border-stone-100 bg-white px-5 py-16 text-center sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <h2 className="mb-5 font-serif text-2xl text-stone-800">
-            Begin with one memory.
-          </h2>
-
-          <p className="mb-8 text-sm font-light leading-relaxed text-stone-500 sm:text-base">
-            Create a memorial, browse remembrance pages, or explore Kenya’s
-            shared memory through tragedy and history.
+          <p className="font-serif text-2xl italic leading-relaxed text-stone-700 sm:text-3xl">
+            “Gone from sight, but never from memory.”
           </p>
 
-          <div className="flex flex-col justify-center gap-3 sm:flex-row">
+          <p className="mx-auto mt-6 max-w-2xl text-sm font-light leading-relaxed text-stone-500 sm:text-base">
+            Begin with one memory. Create a memorial, browse remembrance pages,
+            or preserve a loved one’s story for generations to come.
+          </p>
+
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link
               href="/add-loved-one"
               className="rounded-full bg-stone-900 px-7 py-3.5 text-sm font-medium text-white"
@@ -195,29 +206,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <footer className="border-t border-stone-100 bg-white px-5 py-12 text-center sm:px-6 sm:py-14">
-        <p className="mb-8 font-serif text-lg italic text-stone-400">
-          ♡ In loving memory, forever remembered.
-        </p>
-
-        <div className="mb-8 flex flex-wrap justify-center gap-5 text-sm text-stone-500 sm:gap-7">
-          <Link href="/">Home</Link>
-          <Link href="/memorials">Memorials</Link>
-          <Link href="/categories">Categories</Link>
-          <Link href="/tragedies">Tragedies</Link>
-          <Link href="/add-loved-one">Add Loved One</Link>
-          <Link href="/about">About</Link>
-        </div>
-
-        <p className="mx-auto max-w-xl text-sm font-light leading-relaxed text-stone-400">
-          Milele Twakumbuka preserves memory, legacy, reflection, and shared
-          humanity across generations.
-        </p>
-
-        <p className="mt-10 text-xs uppercase tracking-[0.3em] text-stone-300">
-          © 2026 Milele Twakumbuka
-        </p>
-      </footer>
+      <Footer />
     </main>
   );
 }
