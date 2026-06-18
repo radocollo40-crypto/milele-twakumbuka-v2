@@ -81,42 +81,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-stone-50 text-stone-900">
       <Navbar />
 
-      <header className="relative overflow-hidden border-b border-stone-100 bg-white py-20 sm:py-24 md:py-40">
-        <div className="absolute inset-0 flex items-center justify-center">
+      <header className="border-b border-stone-100 bg-white py-10 sm:py-14 md:py-16">
+        <div className="mx-auto flex max-w-6xl items-center justify-center px-5 sm:px-6">
           <img
             src="/logo.png"
-            className="h-full max-h-[620px] w-full object-contain opacity-25"
-            alt=""
+            alt="Milele Twakumbuka"
+            className="h-auto w-full max-w-[750px] object-contain"
           />
-        </div>
-
-        <div className="absolute inset-0 bg-white/45" />
-
-        <div className="relative z-10 mx-auto max-w-4xl space-y-7 px-5 text-center sm:px-6">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-stone-400">
-            In Loving Memory
-          </p>
-
-          <p className="mx-auto max-w-2xl text-xl font-light leading-relaxed text-stone-600 sm:text-2xl">
-            A peaceful and dignified space to honor loved ones, preserve memory,
-            celebrate legacy, and remember together.
-          </p>
-
-          <div className="flex flex-col items-stretch justify-center gap-3 pt-3 sm:flex-row sm:items-center">
-            <Link
-              href="/memorials"
-              className="rounded-full bg-stone-900 px-7 py-3.5 text-center text-sm font-medium text-white"
-            >
-              View Memorials
-            </Link>
-
-            <Link
-              href="/add-loved-one"
-              className="rounded-full border border-stone-200 bg-white px-7 py-3.5 text-center text-sm font-medium text-stone-700"
-            >
-              Add Loved One
-            </Link>
-          </div>
         </div>
       </header>
 
