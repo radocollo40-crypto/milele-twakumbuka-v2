@@ -91,6 +91,12 @@ export default function HomePage() {
         </div>
 
         <div className="relative z-10 mx-auto max-w-4xl space-y-6 px-5 text-center sm:px-6 md:space-y-7">
+          <img
+            src="/logo.png"
+            alt="Milele Twakumbuka"
+            className="mx-auto mb-4 h-44 w-auto object-contain sm:h-52 md:h-60"
+          />
+
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-stone-400">
             In Loving Memory
           </p>
