@@ -139,16 +139,18 @@ export default function TermsPage() {
       <section className="border-t border-stone-100 bg-white px-5 py-14 sm:px-6">
         <div className="mx-auto max-w-4xl rounded-3xl bg-stone-900 p-7 text-white sm:p-8">
           <p className="mb-3 text-xs uppercase tracking-[0.25em] text-stone-400">
-            Respectful Use
+            Our Commitment
           </p>
 
-          <p className="font-serif text-2xl leading-relaxed text-stone-100">
-            This platform is for remembrance, not harm.
+          <p className="font-serif text-2xl leading-relaxed text-stone-100 sm:text-3xl">
+            Honoring lives. Preserving memories. Protecting legacy.
           </p>
 
-          <p className="mt-4 text-sm font-light leading-relaxed text-stone-400">
-            Please use Milele Twakumbuka with compassion, honesty, and respect
-            for families, communities, and the memories being preserved.
+          <p className="mt-5 text-sm font-light leading-relaxed text-stone-400 sm:text-base">
+            Milele Twakumbuka is committed to providing a respectful and lasting
+            space where families, communities, and future generations can
+            remember, reflect, and celebrate lives with dignity, compassion, and
+            care.
           </p>
         </div>
       </section>
