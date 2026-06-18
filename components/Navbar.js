@@ -29,13 +29,27 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#faf8f5]/95 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           href="/"
           onClick={closeMenu}
-          className="shrink-0 font-serif text-xl tracking-wide text-[#2f2f2f] sm:text-2xl"
+          className="flex min-w-0 items-center gap-3"
         >
-          Milele Twakumbuka
+          <img
+            src="/logo.png"
+            alt="Milele Twakumbuka"
+            className="h-12 w-12 rounded-full object-contain sm:h-14 sm:w-14"
+          />
+
+          <div className="min-w-0">
+            <p className="truncate font-serif text-lg leading-tight text-[#2f2f2f] sm:text-xl">
+              Milele Twakumbuka
+            </p>
+
+            <p className="hidden text-[10px] uppercase tracking-[0.18em] text-stone-400 sm:block">
+              Preserving Memory & Legacy
+            </p>
+          </div>
         </Link>
 
         <div className="hidden items-center gap-6 text-sm text-stone-600 lg:flex">
@@ -55,13 +69,13 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setOpen((prev) => !prev)}
-          className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700 shadow-sm lg:hidden"
+          className="shrink-0 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-stone-700 shadow-sm lg:hidden"
         >
           {open ? "Close" : "Menu"}
         </button>
 
         {open && (
-          <div className="absolute right-4 top-[72px] z-50 w-64 rounded-3xl border border-stone-100 bg-white p-4 shadow-xl lg:hidden">
+          <div className="absolute right-4 top-[76px] z-50 w-64 rounded-3xl border border-stone-100 bg-white p-4 shadow-xl lg:hidden">
             <div className="flex flex-col gap-1 text-sm text-stone-700">
               {links.map((link) => (
                 <Link
