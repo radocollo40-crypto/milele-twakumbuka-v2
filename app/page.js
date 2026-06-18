@@ -85,12 +85,12 @@ export default function HomePage() {
         <div className="absolute inset-0 flex items-center justify-center">
           <img
             src="/logo.png"
-            className="h-full max-h-[520px] w-full object-contain opacity-10"
+            className="h-full max-h-[620px] w-full object-contain opacity-25"
             alt=""
           />
         </div>
 
-        <div className="absolute inset-0 bg-white/70" />
+        <div className="absolute inset-0 bg-white/45" />
 
         <div className="relative z-10 mx-auto max-w-4xl space-y-6 px-5 text-center sm:px-6 md:space-y-7">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-stone-400">
