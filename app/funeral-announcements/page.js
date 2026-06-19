@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import ReportButton from "@/components/ReportButton";
+import Footer from "@/components/Footer";
 
 export default function FuneralAnnouncementsPage() {
   const [user, setUser] = useState(null);
@@ -579,6 +580,7 @@ function InputSelect({ label, value, onChange, memorials }) {
           </option>
         ))}
       </select>
-    </div>
+    <Footer /
+    </main>
   );
 }
