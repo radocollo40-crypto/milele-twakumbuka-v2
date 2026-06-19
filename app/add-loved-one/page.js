@@ -4,6 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 const tragedyNames = {
   "garissa-university-attack": "Garissa University Attack",
@@ -125,7 +127,6 @@ function AddLovedOneContent() {
       }
 
       setMessage("Memorial created successfully. Opening memorial...");
-
       router.push(`/memorials/${data.id}`);
     } catch (error) {
       setMessage("Image upload failed.");
@@ -144,7 +145,9 @@ function AddLovedOneContent() {
   if (!user) {
     return (
       <main className="min-h-screen bg-stone-50 text-stone-900">
-        <section className="flex min-h-screen items-center justify-center px-5">
+        <Navbar />
+
+        <section className="flex min-h-screen items-center justify-center px-5 py-16">
           <div className="w-full max-w-xl rounded-3xl border border-stone-100 bg-white p-8 text-center shadow-sm">
             <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
               Family Access Required
@@ -178,12 +181,16 @@ function AddLovedOneContent() {
             </div>
           </div>
         </section>
+
+        <Footer />
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900">
+      <Navbar />
+
       <section className="border-b border-stone-100 bg-white px-5 py-14 text-center sm:px-6 sm:py-16">
         <p className="mb-4 text-xs uppercase tracking-[0.25em] text-stone-400">
           Begin a Memorial
@@ -204,9 +211,7 @@ function AddLovedOneContent() {
               Connected Tragedy
             </p>
 
-            <p className="font-serif text-xl text-stone-800">
-              {tragedyName}
-            </p>
+            <p className="font-serif text-xl text-stone-800">{tragedyName}</p>
 
             <p className="mt-2 text-sm font-light leading-relaxed text-stone-500">
               This memorial will be linked to this tragedy remembrance space.
@@ -334,6 +339,8 @@ function AddLovedOneContent() {
           </div>
         </div>
       </section>
+
+      <Footer />
     </main>
   );
 }
