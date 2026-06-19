@@ -535,6 +535,8 @@ export default function FuneralAnnouncementsPage() {
           )}
         </section>
       </div>
+
+      <Footer />
     </main>
   );
 }
@@ -580,7 +582,6 @@ function InputSelect({ label, value, onChange, memorials }) {
           </option>
         ))}
       </select>
-    <Footer /
-    </main>
+    </div>
   );
 }
