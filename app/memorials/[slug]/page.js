@@ -26,6 +26,51 @@ async function getMemorial(slug) {
   return data;
 }
 
+export async function generateMetadata({ params }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug;
+
+  const memorial = await getMemorial(slug);
+
+  if (!memorial) {
+    return {
+      title: "Memorial | Milele Twakumbuka",
+      description:
+        "Remembering lives with dignity and preserving memories across generations.",
+    };
+  }
+
+  const title = `${memorial.name} | Milele Twakumbuka`;
+  const description =
+    memorial.tribute ||
+    memorial.story ||
+    "A life remembered with dignity and love.";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images: memorial.image_url
+        ? [
+            {
+              url: memorial.image_url,
+              alt: memorial.name,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: memorial.image_url ? [memorial.image_url] : [],
+    },
+  };
+}
+
 async function getGalleryImages(slug) {
   const { data } = await supabase
     .from("memorial_gallery")
