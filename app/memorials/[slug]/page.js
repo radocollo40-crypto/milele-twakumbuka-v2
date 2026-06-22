@@ -131,8 +131,32 @@ export default async function MemorialDetailPage({ params }) {
     );
   }
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    mainEntity: {
+      "@type": "Person",
+      name: memorial.name,
+      description:
+        memorial.tribute ||
+        memorial.story ||
+        "A life remembered with dignity and love.",
+      image: memorial.image_url || `${SITE_URL}/opengraph-image.png`,
+      birthDate: memorial.birth_date || undefined,
+      deathDate: memorial.death_date || undefined,
+    },
+    url: `${SITE_URL}/memorials/${memorial.id}`,
+  };
+
   return (
     <main className="min-h-screen bg-stone-50 text-stone-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData),
+        }}
+      />
+
       <section className="relative flex min-h-[60vh] items-end overflow-hidden">
         {memorial.image_url ? (
           <img
