@@ -11,8 +11,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://mileletwakumbuka.com";
+
 export const metadata = {
-  metadataBase: new URL("https://mileletwakumbuka.com"),
+  metadataBase: new URL(siteUrl),
 
   verification: {
     google: "zAKCDNCdkfUHy2q51ASDJH5dc0YRUUCkpDKzHhRMjqY",
@@ -43,7 +45,7 @@ export const metadata = {
     title: "Milele Twakumbuka | Preserving Memory & Legacy",
     description:
       "A peaceful digital sanctuary for honoring loved ones, preserving memories, and supporting families with dignity.",
-    url: "https://mileletwakumbuka.com",
+    url: siteUrl,
     siteName: "Milele Twakumbuka",
     locale: "en_US",
     type: "website",
@@ -72,6 +74,32 @@ export const metadata = {
   },
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "Milele Twakumbuka",
+      url: siteUrl,
+      logo: `${siteUrl}/icon.png`,
+      description:
+        "A peaceful digital sanctuary for honoring loved ones, preserving memories, funeral notices, and supporting families with dignity.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: "Milele Twakumbuka",
+      description:
+        "A peaceful digital sanctuary for honoring loved ones, preserving memories, funeral notices, and supporting families with dignity.",
+      publisher: {
+        "@id": `${siteUrl}/#organization`,
+      },
+    },
+  ],
+};
+
 export default function RootLayout({ children }) {
   return (
     <html
@@ -79,6 +107,13 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
+          }}
+        />
+
         {children}
       </body>
     </html>
