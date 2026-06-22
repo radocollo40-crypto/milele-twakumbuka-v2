@@ -14,6 +14,10 @@ const geistMono = Geist_Mono({
 export const metadata = {
   metadataBase: new URL("https://mileletwakumbuka.com"),
 
+  verification: {
+    google: "zAKCDNCdkfUHy2q51ASDJH5dc0YRUUCkpDKzHhRMjqY",
+  },
+
   title: {
     default: "Milele Twakumbuka | Preserving Memory & Legacy",
     template: "%s | Milele Twakumbuka",
@@ -74,7 +78,9 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+      </body>
     </html>
   );
 }
