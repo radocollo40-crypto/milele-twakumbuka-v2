@@ -6,6 +6,8 @@ import FlowerSection from "../../../components/FlowerSection";
 import ReportButton from "../../../components/ReportButton";
 import Footer from "../../../components/Footer";
 
+const SITE_URL = "https://mileletwakumbuka.com";
+
 async function getMemorial(slug) {
   const numericId = Number(slug);
 
@@ -37,6 +39,28 @@ export async function generateMetadata({ params }) {
       title: "Memorial | Milele Twakumbuka",
       description:
         "Remembering lives with dignity and preserving memories across generations.",
+      openGraph: {
+        title: "Memorial | Milele Twakumbuka",
+        description:
+          "Remembering lives with dignity and preserving memories across generations.",
+        url: `${SITE_URL}/memorials/${slug || ""}`,
+        type: "article",
+        images: [
+          {
+            url: `${SITE_URL}/opengraph-image.png`,
+            width: 1200,
+            height: 630,
+            alt: "Milele Twakumbuka",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Memorial | Milele Twakumbuka",
+        description:
+          "Remembering lives with dignity and preserving memories across generations.",
+        images: [`${SITE_URL}/opengraph-image.png`],
+      },
     };
   }
 
@@ -46,27 +70,30 @@ export async function generateMetadata({ params }) {
     memorial.story ||
     "A life remembered with dignity and love.";
 
+  const imageUrl = memorial.image_url || `${SITE_URL}/opengraph-image.png`;
+
   return {
     title,
     description,
     openGraph: {
       title,
       description,
+      url: `${SITE_URL}/memorials/${memorial.id}`,
       type: "article",
-      images: memorial.image_url
-        ? [
-            {
-              url: memorial.image_url,
-              alt: memorial.name,
-            },
-          ]
-        : [],
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: memorial.name || "Milele Twakumbuka Memorial",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: memorial.image_url ? [memorial.image_url] : [],
+      images: [imageUrl],
     },
   };
 }
