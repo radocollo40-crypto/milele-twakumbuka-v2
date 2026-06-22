@@ -4,6 +4,6 @@ export default function robots() {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://milele-twakumbuka-v2.vercel.app/sitemap.xml",
+    sitemap: "https://mileletwakumbuka.com/sitemap.xml",
   };
 }

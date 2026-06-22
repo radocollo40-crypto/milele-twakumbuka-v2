@@ -12,25 +12,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  metadataBase: new URL("https://milele-twakumbuka-v2.vercel.app"),
+  metadataBase: new URL("https://mileletwakumbuka.com"),
 
   title: {
     default: "Milele Twakumbuka | Preserving Memory & Legacy",
-    template: "%s",
+    template: "%s | Milele Twakumbuka",
   },
 
   description:
     "A peaceful digital sanctuary for honoring loved ones, preserving memories, funeral notices, and supporting families with dignity.",
 
   keywords: [
+    "memorial website Kenya",
+    "online memorial Kenya",
+    "digital remembrance",
+    "funeral notices Kenya",
     "memorials",
-    "funeral notices",
     "remembrance",
-    "legacy",
+    "legacy preservation",
     "family walls",
     "tributes",
-    "Kenya memorials",
-    "memory preservation",
     "Milele Twakumbuka",
   ],
 
@@ -38,14 +39,13 @@ export const metadata = {
     title: "Milele Twakumbuka | Preserving Memory & Legacy",
     description:
       "A peaceful digital sanctuary for honoring loved ones, preserving memories, and supporting families with dignity.",
-    url: "https://milele-twakumbuka-v2.vercel.app",
+    url: "https://mileletwakumbuka.com",
     siteName: "Milele Twakumbuka",
     locale: "en_US",
     type: "website",
-
     images: [
       {
-        url: "/logo.png",
+        url: "/opengraph-image.png",
         width: 1200,
         height: 630,
         alt: "Milele Twakumbuka",
@@ -58,11 +58,13 @@ export const metadata = {
     title: "Milele Twakumbuka | Preserving Memory & Legacy",
     description:
       "A peaceful digital sanctuary for honoring loved ones, preserving memories, and supporting families with dignity.",
-    images: ["/logo.png"],
+    images: ["/opengraph-image.png"],
   },
 
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
   },
 };
 
@@ -72,9 +74,7 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        {children}
-      </body>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }
