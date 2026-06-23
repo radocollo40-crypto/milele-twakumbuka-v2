@@ -4,6 +4,7 @@ import MemorialCondolencesSection from "../../../components/MemorialCondolencesS
 import CandleSection from "../../../components/CandleSection";
 import FlowerSection from "../../../components/FlowerSection";
 import ReportButton from "../../../components/ReportButton";
+import ShareButtons from "../../../components/ShareButtons";
 import Footer from "../../../components/Footer";
 
 const SITE_URL = "https://mileletwakumbuka.com";
@@ -305,6 +306,11 @@ export default async function MemorialDetailPage({ params }) {
                 pageUrl={`/memorials/${memorial.id}`}
               />
             </div>
+
+            <ShareButtons
+              title={`${memorial.name} | Milele Twakumbuka`}
+              url={`${SITE_URL}/memorials/${memorial.id}`}
+            />
 
             <Link
               href={`/memorials/${slug}/family-wall`}
