@@ -82,12 +82,39 @@ export default function HomePage() {
       <Navbar />
 
       <header className="border-b border-stone-100 bg-white py-10 sm:py-14 md:py-16">
-        <div className="mx-auto flex max-w-6xl items-center justify-center px-5 sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-center px-5 text-center sm:px-6">
           <img
             src="/logo.png"
-            alt="Milele Twakumbuka"
-            className="h-auto w-full max-w-[750px] object-contain"
+            alt="Milele Twakumbuka - Online memorial website in Kenya"
+            className="h-auto w-full max-w-[650px] object-contain"
           />
+
+          <h1 className="mt-8 max-w-4xl font-serif text-3xl leading-tight text-stone-800 sm:text-4xl md:text-5xl">
+            An Online Memorial Website in Kenya for Preserving Memories Forever
+          </h1>
+
+          <p className="mt-5 max-w-3xl text-base font-light leading-relaxed text-stone-500 sm:text-lg">
+            Milele Twakumbuka is a peaceful digital remembrance platform where
+            families in Kenya can honor loved ones, create online memorials,
+            share funeral notices, receive condolences, light candles, and
+            preserve life stories with dignity.
+          </p>
+
+          <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <Link
+              href="/add-loved-one"
+              className="rounded-full bg-stone-900 px-7 py-3.5 text-center text-sm font-medium text-white"
+            >
+              Create a Memorial
+            </Link>
+
+            <Link
+              href="/memorials"
+              className="rounded-full border border-stone-200 bg-white px-7 py-3.5 text-center text-sm font-medium text-stone-700"
+            >
+              View Memorials
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -160,6 +187,27 @@ export default function HomePage() {
       </FadeInSection>
 
       <FadeInSection>
+        <section className="border-t border-stone-100 bg-white py-14 sm:py-16">
+          <div className="mx-auto max-w-5xl px-5 text-center sm:px-6 lg:px-8">
+            <p className="text-xs font-medium uppercase tracking-widest text-stone-400">
+              Digital Remembrance Kenya
+            </p>
+
+            <h2 className="mt-3 font-serif text-2xl text-stone-800 sm:text-3xl">
+              A Memorial Website Built for Kenyan Families
+            </h2>
+
+            <p className="mx-auto mt-5 max-w-3xl font-light leading-relaxed text-stone-500">
+              Milele Twakumbuka helps families preserve memory beyond the day of
+              burial. It brings together online memorial pages, funeral notices,
+              condolences, candles, flowers, photographs, and family remembrance
+              spaces in one respectful platform.
+            </p>
+          </div>
+        </section>
+      </FadeInSection>
+
+      <FadeInSection>
         <section className="border-t border-stone-100 py-14 sm:py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8 sm:mb-10">
@@ -226,14 +274,15 @@ export default function HomePage() {
             <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-stone-100 bg-white p-6 sm:p-8 md:flex-row md:items-center">
               <div className="max-w-xl space-y-2">
                 <p className="text-xs font-medium uppercase tracking-widest text-stone-400">
-                  Service Notices
+                  Funeral Notices Kenya
                 </p>
                 <h2 className="font-serif text-2xl text-stone-800">
                   Funeral Notices
                 </h2>
                 <p className="text-sm font-light leading-relaxed text-stone-500">
-                  Share funeral service dates, burial details, venues, and
-                  family announcements connected to a loved one’s memorial.
+                  Share funeral service dates, burial details, venues, family
+                  announcements, and memorial information connected to a loved
+                  one’s remembrance page.
                 </p>
               </div>
 
@@ -251,14 +300,19 @@ export default function HomePage() {
       <FadeInSection>
         <section className="border-t border-stone-100 py-14 sm:py-16">
           <div className="mx-auto max-w-4xl space-y-7 px-5 text-center sm:px-6 lg:px-8">
+            <p className="text-xs font-medium uppercase tracking-widest text-stone-400">
+              Online Memorial Kenya
+            </p>
+
             <h2 className="font-serif text-2xl text-stone-800">
               A living archive of memory
             </h2>
 
             <p className="font-light leading-relaxed text-stone-500">
               Milele Twakumbuka is built to preserve life stories with dignity —
-              personal memories, family legacies, community histories, and
-              national remembrance.
+              personal memories, family legacies, community histories, funeral
+              notices, and national remembrance for present and future
+              generations.
             </p>
 
             <Link
