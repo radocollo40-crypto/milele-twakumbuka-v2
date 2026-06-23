@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 
 export default function AdminPage() {
@@ -158,46 +160,58 @@ export default function AdminPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
-        <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
-          <h1 className="mb-4 font-serif text-3xl text-stone-900">
-            Admin Login Required
-          </h1>
+      <main className="min-h-screen bg-stone-50 text-stone-900">
+        <Navbar />
 
-          <p className="mb-6 text-sm text-stone-500">
-            Please login with an admin account to access this dashboard.
-          </p>
+        <section className="flex min-h-[70vh] items-center justify-center px-5 text-center">
+          <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
+            <h1 className="mb-4 font-serif text-3xl text-stone-900">
+              Admin Login Required
+            </h1>
 
-          <Link
-            href="/login?redirect=/admin"
-            className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
-          >
-            Login
-          </Link>
-        </div>
+            <p className="mb-6 text-sm text-stone-500">
+              Please login with an admin account to access this dashboard.
+            </p>
+
+            <Link
+              href="/login?redirect=/admin"
+              className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
+            >
+              Login
+            </Link>
+          </div>
+        </section>
+
+        <Footer />
       </main>
     );
   }
 
   if (!isAdmin) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-stone-50 px-5 text-center">
-        <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
-          <h1 className="mb-4 font-serif text-3xl text-stone-900">
-            Access Denied
-          </h1>
+      <main className="min-h-screen bg-stone-50 text-stone-900">
+        <Navbar />
 
-          <p className="mb-6 text-sm text-stone-500">
-            This area is only available to Milele Twakumbuka administrators.
-          </p>
+        <section className="flex min-h-[70vh] items-center justify-center px-5 text-center">
+          <div className="max-w-md rounded-3xl bg-white p-8 shadow-sm">
+            <h1 className="mb-4 font-serif text-3xl text-stone-900">
+              Access Denied
+            </h1>
 
-          <Link
-            href="/"
-            className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
-          >
-            Back Home
-          </Link>
-        </div>
+            <p className="mb-6 text-sm text-stone-500">
+              This area is only available to Milele Twakumbuka administrators.
+            </p>
+
+            <Link
+              href="/"
+              className="rounded-full bg-stone-900 px-7 py-3 text-sm text-white"
+            >
+              Back Home
+            </Link>
+          </div>
+        </section>
+
+        <Footer />
       </main>
     );
   }
@@ -206,178 +220,190 @@ export default function AdminPage() {
   const reviewedReports = reports.filter((report) => report.status !== "pending");
 
   return (
-    <main className="min-h-screen bg-stone-50 px-5 py-14 text-stone-900">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="mb-3 text-xs uppercase tracking-[0.25em] text-stone-400">
-              Admin Dashboard
-            </p>
+    <main className="min-h-screen bg-stone-50 text-stone-900">
+      <Navbar />
 
-            <h1 className="font-serif text-4xl text-stone-900">
-              Reports Review
-            </h1>
+      <section className="px-5 py-14 sm:px-6">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="mb-3 text-xs uppercase tracking-[0.25em] text-stone-400">
+                Admin Dashboard
+              </p>
 
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-stone-500">
-              Review reported memorials and funeral notices. Reported content
-              remains visible until an admin reviews it.
-            </p>
-          </div>
+              <h1 className="font-serif text-4xl text-stone-900">
+                Reports Review
+              </h1>
 
-          <Link
-            href="/"
-            className="rounded-full border border-stone-200 bg-white px-6 py-3 text-sm text-stone-600"
-          >
-            Back Home
-          </Link>
-        </div>
-
-        {message && (
-          <p className="mb-6 rounded-2xl bg-white p-4 text-sm text-stone-600 shadow-sm">
-            {message}
-          </p>
-        )}
-
-        <div className="mb-8 grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-sm text-stone-400">Total Reports</p>
-            <p className="mt-2 font-serif text-4xl text-stone-900">
-              {reports.length}
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-sm text-stone-400">Pending</p>
-            <p className="mt-2 font-serif text-4xl text-stone-900">
-              {pendingReports.length}
-            </p>
-          </div>
-
-          <div className="rounded-3xl bg-white p-6 shadow-sm">
-            <p className="text-sm text-stone-400">Reviewed</p>
-            <p className="mt-2 font-serif text-4xl text-stone-900">
-              {reviewedReports.length}
-            </p>
-          </div>
-        </div>
-
-        <section className="space-y-5">
-          {reports.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-stone-200 bg-white p-10 text-center">
-              <p className="mb-3 text-4xl">🕊️</p>
-
-              <h2 className="mb-3 font-serif text-2xl text-stone-800">
-                No reports yet
-              </h2>
-
-              <p className="text-sm text-stone-500">
-                Submitted reports will appear here for admin review.
+              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-stone-500">
+                Review reported memorials and funeral notices. Reported content
+                remains visible until an admin reviews it.
               </p>
             </div>
-          ) : (
-            reports.map((report) => {
-              const canDelete =
-                report.content_type === "memorial" ||
-                report.content_type === "funeral_notice";
 
-              return (
-                <article
-                  key={report.id}
-                  className="rounded-3xl border border-stone-100 bg-white p-6 shadow-sm"
-                >
-                  <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <p className="mb-2 text-xs uppercase tracking-[0.25em] text-stone-400">
-                        {report.content_type} · Report #{report.id}
-                      </p>
+            <Link
+              href="/"
+              className="rounded-full border border-stone-200 bg-white px-6 py-3 text-sm text-stone-600"
+            >
+              Back Home
+            </Link>
+          </div>
 
-                      <h2 className="font-serif text-2xl text-stone-900">
-                        {report.reason || "Reported content"}
-                      </h2>
-
-                      <p className="mt-2 text-xs text-stone-400">
-                        Submitted:{" "}
-                        {report.created_at
-                          ? new Date(report.created_at).toLocaleString()
-                          : "Unknown date"}
-                      </p>
-                    </div>
-
-                    <span className="rounded-full bg-stone-100 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
-                      {report.status || "pending"}
-                    </span>
-                  </div>
-
-                  <div className="grid gap-5 md:grid-cols-2">
-                    <div className="rounded-2xl bg-stone-50 p-4">
-                      <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
-                        Content
-                      </p>
-
-                      <p className="text-sm text-stone-600">
-                        Type: {report.content_type}
-                      </p>
-
-                      <p className="mt-1 text-sm text-stone-600">
-                        ID: {report.content_id}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl bg-stone-50 p-4">
-                      <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
-                        Report Details
-                      </p>
-
-                      <p className="text-sm text-stone-600">
-                        {report.details || "No additional details provided."}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <Link
-                      href={getContentLink(report)}
-                      className="rounded-full bg-stone-900 px-5 py-2.5 text-sm text-white"
-                    >
-                      Open Content
-                    </Link>
-
-                    <button
-                      onClick={() => updateReportStatus(report.id, "reviewed")}
-                      className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
-                    >
-                      Mark Reviewed
-                    </button>
-
-                    <button
-                      onClick={() => updateReportStatus(report.id, "resolved")}
-                      className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
-                    >
-                      Mark Resolved
-                    </button>
-
-                    <button
-                      onClick={() => updateReportStatus(report.id, "dismissed")}
-                      className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
-                    >
-                      Dismiss
-                    </button>
-
-                    {canDelete && (
-                      <button
-                        onClick={() => deleteReportedContent(report)}
-                        className="rounded-full bg-red-50 px-5 py-2.5 text-sm text-red-600"
-                      >
-                        Delete Content
-                      </button>
-                    )}
-                  </div>
-                </article>
-              );
-            })
+          {message && (
+            <p className="mb-6 rounded-2xl bg-white p-4 text-sm text-stone-600 shadow-sm">
+              {message}
+            </p>
           )}
-        </section>
-      </div>
+
+          <div className="mb-8 grid gap-4 md:grid-cols-3">
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
+              <p className="text-sm text-stone-400">Total Reports</p>
+              <p className="mt-2 font-serif text-4xl text-stone-900">
+                {reports.length}
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
+              <p className="text-sm text-stone-400">Pending</p>
+              <p className="mt-2 font-serif text-4xl text-stone-900">
+                {pendingReports.length}
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white p-6 shadow-sm">
+              <p className="text-sm text-stone-400">Reviewed</p>
+              <p className="mt-2 font-serif text-4xl text-stone-900">
+                {reviewedReports.length}
+              </p>
+            </div>
+          </div>
+
+          <section className="space-y-5">
+            {reports.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-stone-200 bg-white p-10 text-center">
+                <p className="mb-3 text-4xl">🕊️</p>
+
+                <h2 className="mb-3 font-serif text-2xl text-stone-800">
+                  No reports yet
+                </h2>
+
+                <p className="text-sm text-stone-500">
+                  Submitted reports will appear here for admin review.
+                </p>
+              </div>
+            ) : (
+              reports.map((report) => {
+                const canDelete =
+                  report.content_type === "memorial" ||
+                  report.content_type === "funeral_notice";
+
+                return (
+                  <article
+                    key={report.id}
+                    className="rounded-3xl border border-stone-100 bg-white p-6 shadow-sm"
+                  >
+                    <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <p className="mb-2 text-xs uppercase tracking-[0.25em] text-stone-400">
+                          {report.content_type} · Report #{report.id}
+                        </p>
+
+                        <h2 className="font-serif text-2xl text-stone-900">
+                          {report.reason || "Reported content"}
+                        </h2>
+
+                        <p className="mt-2 text-xs text-stone-400">
+                          Submitted:{" "}
+                          {report.created_at
+                            ? new Date(report.created_at).toLocaleString()
+                            : "Unknown date"}
+                        </p>
+                      </div>
+
+                      <span className="rounded-full bg-stone-100 px-4 py-2 text-xs uppercase tracking-[0.2em] text-stone-500">
+                        {report.status || "pending"}
+                      </span>
+                    </div>
+
+                    <div className="grid gap-5 md:grid-cols-2">
+                      <div className="rounded-2xl bg-stone-50 p-4">
+                        <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
+                          Content
+                        </p>
+
+                        <p className="text-sm text-stone-600">
+                          Type: {report.content_type}
+                        </p>
+
+                        <p className="mt-1 text-sm text-stone-600">
+                          ID: {report.content_id}
+                        </p>
+                      </div>
+
+                      <div className="rounded-2xl bg-stone-50 p-4">
+                        <p className="mb-1 text-xs uppercase tracking-[0.2em] text-stone-400">
+                          Report Details
+                        </p>
+
+                        <p className="text-sm text-stone-600">
+                          {report.details || "No additional details provided."}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-3">
+                      <Link
+                        href={getContentLink(report)}
+                        className="rounded-full bg-stone-900 px-5 py-2.5 text-sm text-white"
+                      >
+                        Open Content
+                      </Link>
+
+                      <button
+                        onClick={() =>
+                          updateReportStatus(report.id, "reviewed")
+                        }
+                        className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
+                      >
+                        Mark Reviewed
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateReportStatus(report.id, "resolved")
+                        }
+                        className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
+                      >
+                        Mark Resolved
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          updateReportStatus(report.id, "dismissed")
+                        }
+                        className="rounded-full border border-stone-200 bg-white px-5 py-2.5 text-sm text-stone-600"
+                      >
+                        Dismiss
+                      </button>
+
+                      {canDelete && (
+                        <button
+                          onClick={() => deleteReportedContent(report)}
+                          className="rounded-full bg-red-50 px-5 py-2.5 text-sm text-red-600"
+                        >
+                          Delete Content
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </section>
+        </div>
+      </section>
+
+      <Footer />
     </main>
   );
 }
