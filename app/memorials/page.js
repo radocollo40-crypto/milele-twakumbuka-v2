@@ -44,18 +44,39 @@ function MemorialsContent() {
   }, []);
 
   const filteredMemorials = useMemo(() => {
+    const cleanSearch = searchTerm.trim().toLowerCase();
+
     return memorials.filter((person) => {
       const matchesCategory =
         selectedCategory === "All" || person.category === selectedCategory;
 
-      const matchesSearch =
-        person.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        person.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        person.tribute?.toLowerCase().includes(searchTerm.toLowerCase());
+      if (!cleanSearch) {
+        return matchesCategory;
+      }
 
-      return matchesCategory && matchesSearch;
+      const searchableText = [
+        person.name,
+        person.category,
+        person.relationship,
+        person.tribute,
+        person.story,
+        person.birth_date,
+        person.death_date,
+        person.birth_date ? String(new Date(person.birth_date).getFullYear()) : "",
+        person.death_date ? String(new Date(person.death_date).getFullYear()) : "",
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return matchesCategory && searchableText.includes(cleanSearch);
     });
   }, [memorials, selectedCategory, searchTerm]);
+
+  function clearSearch() {
+    setSearchTerm("");
+    setSelectedCategory("All");
+  }
 
   return (
     <main className="min-h-screen bg-[#fbfaf8] text-[#1f1f1f]">
@@ -77,13 +98,13 @@ function MemorialsContent() {
 
       <section className="px-5 pb-12 sm:px-6 sm:pb-16">
         <div className="mx-auto max-w-6xl rounded-3xl border border-[#eee8e1] bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center">
+          <div className="flex flex-col gap-5">
             <input
               type="text"
-              placeholder="Search memorials..."
+              placeholder="Search by name, relationship, category, tribute, or year..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="min-h-14 flex-1 rounded-2xl border border-[#eee8e1] bg-[#fbfaf8] px-5 text-sm outline-none"
+              className="min-h-14 w-full rounded-2xl border border-[#eee8e1] bg-[#fbfaf8] px-5 text-sm outline-none"
             />
 
             <div className="flex gap-3 overflow-x-auto pb-2">
@@ -102,6 +123,30 @@ function MemorialsContent() {
                 </button>
               ))}
             </div>
+
+            <div className="flex flex-col gap-3 border-t border-[#eee8e1] pt-5 text-sm text-[#7a7168] sm:flex-row sm:items-center sm:justify-between">
+              <p>
+                Showing{" "}
+                <span className="font-medium text-stone-900">
+                  {filteredMemorials.length}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium text-stone-900">
+                  {memorials.length}
+                </span>{" "}
+                memorials
+              </p>
+
+              {(searchTerm || selectedCategory !== "All") && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  className="w-fit rounded-full border border-stone-200 bg-white px-5 py-2 text-sm text-stone-600"
+                >
+                  Clear Search
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -114,7 +159,24 @@ function MemorialsContent() {
             </div>
           ) : filteredMemorials.length === 0 ? (
             <div className="rounded-3xl border border-[#eee8e1] bg-white p-12 text-center shadow-sm">
-              No memorials found.
+              <p className="mb-4 text-4xl">🕊️</p>
+
+              <h2 className="mb-3 font-serif text-2xl text-stone-800">
+                No memorials found
+              </h2>
+
+              <p className="mx-auto mb-6 max-w-md text-sm font-light leading-relaxed text-stone-500">
+                We could not find a memorial matching your search. Try another
+                name, year, relationship, or category.
+              </p>
+
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="rounded-full bg-stone-900 px-6 py-3 text-sm text-white"
+              >
+                Clear Search
+              </button>
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -147,10 +209,16 @@ function MemorialsContent() {
                       {person.name}
                     </h2>
 
-                    <p className="mb-5 text-sm text-[#9a928b]">
+                    <p className="mb-3 text-sm text-[#9a928b]">
                       {person.birth_date || "Birth"} —{" "}
                       {person.death_date || "Remembrance"}
                     </p>
+
+                    {person.relationship && (
+                      <p className="mb-5 text-xs uppercase tracking-[0.18em] text-stone-400">
+                        {person.relationship}
+                      </p>
+                    )}
 
                     <p className="text-sm leading-relaxed text-[#5f5750]">
                       {person.tribute ||
