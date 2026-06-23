@@ -70,7 +70,7 @@ export async function generateMetadata({ params }) {
   const description =
     memorial.tribute ||
     memorial.story ||
-    "A life remembered with dignity and love.";
+    `In loving memory of ${memorial.name}. Honor their life, share condolences, light candles, and preserve memories for future generations.`;
 
   const imageUrl = memorial.image_url || `${SITE_URL}/opengraph-image.png`;
 
@@ -142,7 +142,7 @@ export default async function MemorialDetailPage({ params }) {
       description:
         memorial.tribute ||
         memorial.story ||
-        "A life remembered with dignity and love.",
+        `In loving memory of ${memorial.name}. Honor their life, share condolences, light candles, and preserve memories for future generations.`,
       image: memorial.image_url || `${SITE_URL}/opengraph-image.png`,
       birthDate: memorial.birth_date || undefined,
       deathDate: memorial.death_date || undefined,
@@ -317,6 +317,7 @@ export default async function MemorialDetailPage({ params }) {
 
             <Link
               href={`/memorials/${slug}/family-wall`}
+              data-nosnippet
               className="block rounded-3xl bg-stone-900 p-7 text-white transition hover:-translate-y-1"
             >
               <h3 className="mb-4 font-serif text-xl">
